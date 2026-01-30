@@ -2,8 +2,12 @@
 <html lang="cs" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>SkySensor — IoT Project</title>
+    <meta name="description" content="SkySensor je modulární IoT platforma pro sběr meteorologických dat. Komplexní řešení od vlastního hardwaru (ESP32, LoRa) po cloudovou vizualizaci. Studentský projekt 2026/2027.">
+    <meta name="keywords" content="SkySensor, IoT, meteostanice, počasí, ESP32, LoRa, Raspberry Pi, MQTT, InfluxDB, Grafana, Docker, React, environmentální monitoring, studentský projekt, PCB">
+    <meta name="author" content="SkySensor Team">
+    <link rel="icon" type="image/png" href="./logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -27,7 +31,6 @@
         }
         
         // --- ROBUSTNÍ LOGIKA PRO DARK MODE (Brave Friendly) ---
-        // Používáme try-catch, protože Brave může blokovat přístup k localStorage
         try {
             const storedTheme = localStorage.getItem('theme');
             const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -38,7 +41,6 @@
                 document.documentElement.classList.remove('dark');
             }
         } catch (e) {
-            // Pokud Brave blokuje localStorage, spolehneme se jen na systém
             if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                 document.documentElement.classList.add('dark');
             }
@@ -50,7 +52,6 @@
             background-color: #0b0d17;
             color: #f3f4f6;
             overflow-x: hidden;
-            /* Smooth přechod pro změnu jazyka i tématu */
             transition: opacity 0.3s ease, background-color 0.3s ease, color 0.3s ease;
         }
         
@@ -149,10 +150,137 @@
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5);
         }
         
+        /* Mobile Menu Styles */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 320px;
+            height: 100vh;
+            background: rgba(26, 28, 44, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 50;
+            transition: right 0.3s ease-in-out;
+            padding-top: 80px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .mobile-menu.active {
+            right: 0;
+        }
+        
+        html:not(.dark) .mobile-menu {
+            background: rgba(255, 255, 255, 0.95);
+            border-left: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 45;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Hamburger Icon */
+        .hamburger {
+            width: 24px;
+            height: 20px;
+            position: relative;
+            transform: rotate(0deg);
+            transition: .5s ease-in-out;
+            cursor: pointer;
+        }
+        
+        .hamburger span {
+            display: block;
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background: currentColor;
+            border-radius: 2px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: .25s ease-in-out;
+        }
+        
+        .hamburger span:nth-child(1) { top: 0; }
+        .hamburger span:nth-child(2), .hamburger span:nth-child(3) { top: 8px; }
+        .hamburger span:nth-child(4) { top: 16px; }
+        
+        .hamburger.active span:nth-child(1) {
+            top: 8px;
+            width: 0%;
+            left: 50%;
+        }
+        
+        .hamburger.active span:nth-child(2) {
+            transform: rotate(45deg);
+        }
+        
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg);
+        }
+        
+        .hamburger.active span:nth-child(4) {
+            top: 8px;
+            width: 0%;
+            left: 50%;
+        }
+        
+        /* Touch-friendly buttons */
+        @media (max-width: 640px) {
+            button, a, .interactive-card {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10px;
+                max-height: 85vh;
+            }
+        }
+        
+        /* Roadmap mobile adjustments */
+        @media (max-width: 768px) {
+            #roadmap-container {
+                padding: 1.5rem;
+            }
+            
+            #roadmap-container .absolute.left-8 {
+                left: 1.5rem !important;
+            }
+            
+            #roadmap-container .pl-12 {
+                padding-left: 3.5rem !important;
+            }
+        }
+        
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        
+        /* Safe area for notches */
+        @supports(padding: max(0px)) {
+            body, header, .mobile-menu {
+                padding-left: min(0px, env(safe-area-inset-left));
+                padding-right: min(0px, env(safe-area-inset-right));
+            }
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -160,10 +288,11 @@
 <header class="sticky top-0 z-40 w-full px-4 py-4 backdrop-blur-lg border-b border-white/10 dark:bg-[#1a1c2c]/70 bg-white/70">
     <div class="container mx-auto max-w-7xl flex justify-between items-center relative">
         <a href="#" class="flex items-center">
-            <img src="./kopie.png" alt="SkySensor" class="h-8 md:h-10 block dark:hidden">
-            <img src="./kopie.png" alt="SkySensor" class="h-8 md:h-10 hidden dark:block">
+            <img src="./skysensor_black.png" alt="SkySensor" class="h-8 md:h-10 block dark:hidden">
+            <img src="./skysensor_white.png" alt="SkySensor" class="h-8 md:h-10 hidden dark:block">
         </a>
         
+        <!-- Desktop Navigation -->
         <nav class="hidden md:flex items-center gap-8 font-medium text-sm text-gray-500 dark:text-gray-400 absolute left-1/2 -translate-x-1/2">
             <a href="#" class="hover:text-indigo-500 transition-colors" data-i18n="nav_home">Home</a>
             <a href="#architecture" class="hover:text-indigo-500 transition-colors" data-i18n="nav_arch">Architektura</a>
@@ -172,6 +301,16 @@
         </nav>
         
         <div class="flex items-center gap-3">
+            <!-- Mobile Menu Toggle -->
+            <button id="mobile-menu-toggle" class="md:hidden p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+            
              <button id="lang-toggle" class="px-3 py-1.5 rounded-lg glass-card text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700">
                 CZ
             </button>
@@ -183,74 +322,85 @@
     </div>
 </header>
 
-    <section class="relative min-h-screen flex items-center justify-center px-6 pt-20 pb-32 overflow-hidden">
+<!-- Mobile Menu -->
+<div id="mobile-menu-overlay" class="mobile-menu-overlay"></div>
+<nav id="mobile-menu" class="mobile-menu">
+    <div class="flex flex-col gap-6 p-6">
+        <a href="#" class="text-lg font-medium py-3 hover:text-indigo-500 transition-colors border-b border-gray-200 dark:border-gray-700" data-i18n="nav_home" onclick="closeMobileMenu()">Home</a>
+        <a href="#architecture" class="text-lg font-medium py-3 hover:text-indigo-500 transition-colors border-b border-gray-200 dark:border-gray-700" data-i18n="nav_arch" onclick="closeMobileMenu()">Architektura</a>
+        <a href="#technology" class="text-lg font-medium py-3 hover:text-indigo-500 transition-colors border-b border-gray-200 dark:border-gray-700" data-i18n="nav_tech" onclick="closeMobileMenu()">Technologie</a>
+        <a href="#roadmap" class="text-lg font-medium py-3 hover:text-indigo-500 transition-colors border-b border-gray-200 dark:border-gray-700" data-i18n="nav_roadmap" onclick="closeMobileMenu()">Roadmapa</a>
+    </div>
+</nav>
+
+    <section class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 pt-20 pb-24 overflow-hidden">
         <div class="max-w-6xl mx-auto text-center relative z-10">
-            <div class="fade-in-up inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-indigo-500/30 mb-8">
-                <span class="mono text-xs text-indigo-500 dark:text-indigo-400 uppercase tracking-wider font-bold" data-i18n="hero_badge">Studentský projekt 2026</span>
+            <div class="fade-in-up inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-indigo-500/30 mb-6 sm:mb-8">
+                <span class="mono text-xs text-indigo-500 dark:text-indigo-400 uppercase tracking-wider font-bold" data-i18n="hero_badge">Studentský projekt 2026/2027</span>
             </div>
             
-            <h1 class="fade-in-up delay-1 text-5xl md:text-8xl font-bold mb-6 leading-tight dark:text-white text-gray-900">
-                <span data-i18n="hero_title_1">Environmentální</span><br/>
+            <h1 class="fade-in-up delay-1 text-3xl sm:text-4xl md:text-5xl lg:text-8xl font-bold mb-4 sm:mb-6 leading-tight dark:text-white text-gray-900">
+                <span data-i18n="hero_title_1">Environmentální</span><br class="hidden sm:block"/>
                 <span class="text-gradient" data-i18n="hero_title_2">Inteligence</span>
             </h1>
             
-            <p class="fade-in-up delay-2 text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12 font-light leading-relaxed" data-i18n="hero_desc">
+            <p class="fade-in-up delay-2 text-base sm:text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-8 sm:mb-12 font-light leading-relaxed px-2" data-i18n="hero_desc">
                 Modulární IoT platforma pro sběr meteorologických dat. Komplexní návrh od vlastního PCB hardwaru po cloudovou vizualizaci.
             </p>
             
-            <div class="fade-in-up delay-3 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="#architecture" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-all hover:scale-105 shadow-lg shadow-indigo-500/30 w-full sm:w-auto" data-i18n="btn_how">
+            <div class="fade-in-up delay-3 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                <a href="#architecture" class="px-6 sm:px-8 py-3 sm:py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-all hover:scale-105 shadow-lg shadow-indigo-500/30 w-full sm:w-auto text-sm sm:text-base" data-i18n="btn_how">
                     Jak to funguje
                 </a>
-                <a href="#technology" class="px-8 py-4 glass-card rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800/60 dark:text-white text-gray-800 w-full sm:w-auto transition-colors">
+                <a href="#technology" class="px-6 sm:px-8 py-3 sm:py-4 glass-card rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800/60 dark:text-white text-gray-800 w-full sm:w-auto transition-colors text-sm sm:text-base">
                     <span data-i18n="btn_stack">Tech Stack</span>
-                    <i data-feather="code" class="w-5 h-5"></i>
+                    <i data-feather="code" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </a>
             </div>
             
-            <div class="fade-in-up delay-4 grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 max-w-4xl mx-auto">
-                <div class="glass-card rounded-xl p-6 text-center">
-                    <div class="mono text-3xl font-bold text-indigo-500 dark:text-indigo-400 mb-2">MVP</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400" data-i18n="stat_mvp">Fáze 1</div>
+            <div class="fade-in-up delay-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-12 sm:mt-20 max-w-4xl mx-auto px-2">
+                <div class="glass-card rounded-xl p-4 sm:p-6 text-center">
+                    <div class="mono text-xl sm:text-2xl md:text-3xl font-bold text-indigo-500 dark:text-indigo-400 mb-1 sm:mb-2">Clean UI</div>
+                    <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400" data-i18n="stat_ui">Přehledné rozhraní</div>
                 </div>
-                <div class="glass-card rounded-xl p-6 text-center">
-                    <div class="mono text-3xl font-bold text-purple-500 dark:text-purple-400 mb-2">LoRa</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400" data-i18n="stat_lora">P2P Komunikace</div>
+                <div class="glass-card rounded-xl p-4 sm:p-6 text-center">
+                    <div class="mono text-xl sm:text-2xl md:text-3xl font-bold text-purple-500 dark:text-purple-400 mb-1 sm:mb-2">LoRa</div>
+                    <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400" data-i18n="stat_lora">P2P Komunikace</div>
                 </div>
-                <div class="glass-card rounded-xl p-6 text-center">
-                    <div class="mono text-3xl font-bold text-green-500 dark:text-green-400 mb-2">IP65</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400" data-i18n="stat_ip">Cílové krytí</div>
+                <div class="glass-card rounded-xl p-4 sm:p-6 text-center">
+                    <div class="mono text-xl sm:text-2xl md:text-3xl font-bold text-green-500 dark:text-green-400 mb-1 sm:mb-2">IP65</div>
+                    <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400" data-i18n="stat_ip">Cílové krytí</div>
                 </div>
-                <div class="glass-card rounded-xl p-6 text-center">
-                    <div class="mono text-3xl font-bold text-yellow-500 dark:text-yellow-400 mb-2">Docker</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">CI/CD Pipeline</div>
+                <div class="glass-card rounded-xl p-4 sm:p-6 text-center">
+                    <div class="mono text-xl sm:text-2xl md:text-3xl font-bold text-yellow-500 dark:text-yellow-400 mb-1 sm:mb-2">Docker</div>
+                    <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">CI/CD Pipeline</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="architecture" class="relative py-24 px-6 bg-gray-50/50 dark:bg-transparent transition-colors">
+    <section id="architecture" class="relative py-12 sm:py-24 px-4 sm:px-6 bg-gray-50/50 dark:bg-transparent transition-colors">
         <div class="max-w-6xl mx-auto">
-            <div class="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent mb-20"></div>
+            <div class="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent mb-12 sm:mb-20"></div>
             
-            <div class="text-center mb-16">
-                <div class="mono text-sm text-indigo-500 uppercase tracking-wider mb-4" data-i18n="sec_arch_sub">02 / Architektura</div>
-                <h2 class="text-4xl md:text-5xl font-bold mb-6 dark:text-white text-gray-900" data-i18n="sec_arch_title">Přehled systému</h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto" data-i18n="sec_arch_desc">
+            <div class="text-center mb-8 sm:mb-16 px-2">
+                <div class="mono text-xs sm:text-sm text-indigo-500 uppercase tracking-wider mb-3 sm:mb-4" data-i18n="sec_arch_sub">02 / Architektura</div>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 dark:text-white text-gray-900" data-i18n="sec_arch_title">Přehled systému</h2>
+                <p class="text-sm sm:text-base md:text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto" data-i18n="sec_arch_desc">
                     Systém je rozdělen do specializovaných modulů. Klikněte na jednotlivé karty pro detailní technickou specifikaci.
                 </p>
             </div>
             
-            <div class="grid md:grid-cols-2 gap-6 mb-12">
-                <div onclick="openModal('module-a')" class="glass-card interactive-card rounded-2xl p-8 border-l-4 border-l-blue-500 group">
-                    <div class="flex items-start justify-between mb-6">
-                        <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xl">A</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-12">
+                <div onclick="openModal('module-a')" class="glass-card interactive-card rounded-2xl p-6 sm:p-8 border-l-4 border-l-blue-500 group">
+                    <div class="flex items-start justify-between mb-4 sm:mb-6">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-lg sm:text-xl">A</div>
                         <div class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-blue-500 flex items-center gap-1">
                             <span data-i18n="more_info">Více info</span> <i data-feather="external-link" class="w-3 h-3"></i>
                         </div>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3 dark:text-white text-gray-900" data-i18n="mod_a_title">Venkovní měřicí jednotka</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4" data-i18n="mod_a_desc">
+                    <h3 class="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 dark:text-white text-gray-900" data-i18n="mod_a_title">Venkovní měřicí jednotka</h3>
+                    <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3 sm:mb-4" data-i18n="mod_a_desc">
                         Autonomní stanice s vlastním PCB. Sběr dat ze senzorů a LoRa vysílání.
                     </p>
                     <div class="flex gap-2 flex-wrap">
@@ -259,15 +409,15 @@
                     </div>
                 </div>
                 
-                <div onclick="openModal('module-b')" class="glass-card interactive-card rounded-2xl p-8 border-l-4 border-l-purple-500 group">
-                    <div class="flex items-start justify-between mb-6">
-                        <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold text-xl">B</div>
+                <div onclick="openModal('module-b')" class="glass-card interactive-card rounded-2xl p-6 sm:p-8 border-l-4 border-l-purple-500 group">
+                    <div class="flex items-start justify-between mb-4 sm:mb-6">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold text-lg sm:text-xl">B</div>
                         <div class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-purple-500 flex items-center gap-1">
                             <span data-i18n="more_info">Více info</span> <i data-feather="external-link" class="w-3 h-3"></i>
                         </div>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3 dark:text-white text-gray-900" data-i18n="mod_b_title">Headless Server & Brána</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4" data-i18n="mod_b_desc">
+                    <h3 class="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 dark:text-white text-gray-900" data-i18n="mod_b_title">Headless Server & Brána</h3>
+                    <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3 sm:mb-4" data-i18n="mod_b_desc">
                         Centrální mozek systému běžící na RPi. Příjem dat, MQTT broker a databáze.
                     </p>
                     <div class="flex gap-2 flex-wrap">
@@ -276,15 +426,15 @@
                     </div>
                 </div>
                 
-                <div onclick="openModal('module-c')" class="glass-card interactive-card rounded-2xl p-8 border-l-4 border-l-green-500 group">
-                    <div class="flex items-start justify-between mb-6">
-                        <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 font-bold text-xl">C</div>
+                <div onclick="openModal('module-c')" class="glass-card interactive-card rounded-2xl p-6 sm:p-8 border-l-4 border-l-green-500 group">
+                    <div class="flex items-start justify-between mb-4 sm:mb-6">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 font-bold text-lg sm:text-xl">C</div>
                         <div class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-green-500 flex items-center gap-1">
                             <span data-i18n="more_info">Více info</span> <i data-feather="external-link" class="w-3 h-3"></i>
                         </div>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3 dark:text-white text-gray-900" data-i18n="mod_c_title">Webová Vizualizace</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4" data-i18n="mod_c_desc">
+                    <h3 class="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 dark:text-white text-gray-900" data-i18n="mod_c_title">Webová Vizualizace</h3>
+                    <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3 sm:mb-4" data-i18n="mod_c_desc">
                         Interaktivní dashboard hostovaný na Modulu B. Přístupný z PC, mobilu či tabletu.
                     </p>
                     <div class="flex gap-2 flex-wrap">
@@ -293,15 +443,15 @@
                     </div>
                 </div>
                 
-                <div onclick="openModal('module-d')" class="glass-card interactive-card rounded-2xl p-8 border-l-4 border-l-orange-500 group">
-                    <div class="flex items-start justify-between mb-6">
-                        <div class="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400 font-bold text-xl">D</div>
+                <div onclick="openModal('module-d')" class="glass-card interactive-card rounded-2xl p-6 sm:p-8 border-l-4 border-l-orange-500 group">
+                    <div class="flex items-start justify-between mb-4 sm:mb-6">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400 font-bold text-lg sm:text-xl">D</div>
                         <div class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-orange-500 flex items-center gap-1">
                             <span data-i18n="more_info">Více info</span> <i data-feather="external-link" class="w-3 h-3"></i>
                         </div>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3 dark:text-white text-gray-900" data-i18n="mod_d_title">Satelitní Uzel</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4" data-i18n="mod_d_desc">
+                    <h3 class="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 dark:text-white text-gray-900" data-i18n="mod_d_title">Satelitní Uzel</h3>
+                    <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3 sm:mb-4" data-i18n="mod_d_desc">
                         Volitelný bateriový senzor (např. do sklepa) pro demonstraci škálovatelnosti.
                     </p>
                     <div class="flex gap-2 flex-wrap">
@@ -313,118 +463,92 @@
         </div>
     </section>
 
-    <section id="technology" class="relative py-24 px-6">
+    <section id="technology" class="relative py-12 sm:py-24 px-4 sm:px-6">
         <div class="max-w-6xl mx-auto">
-            <div class="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent mb-20"></div>
+            <div class="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent mb-12 sm:mb-20"></div>
             
-            <div class="text-center mb-16">
-                <div class="mono text-sm text-indigo-500 uppercase tracking-wider mb-4" data-i18n="sec_tech_sub">03 / Technologie</div>
-                <h2 class="text-4xl md:text-5xl font-bold mb-6 dark:text-white text-gray-900" data-i18n="sec_tech_title">Tech Stack</h2>
-                <p class="text-gray-500 dark:text-gray-400" data-i18n="sec_tech_desc">Klikněte pro technické detaily implementace.</p>
+            <div class="text-center mb-8 sm:mb-16 px-2">
+                <div class="mono text-xs sm:text-sm text-indigo-500 uppercase tracking-wider mb-3 sm:mb-4" data-i18n="sec_tech_sub">03 / Technologie</div>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 dark:text-white text-gray-900" data-i18n="sec_tech_title">Tech Stack</h2>
+                <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400" data-i18n="sec_tech_desc">Klikněte pro technické detaily implementace.</p>
             </div>
             
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div class="glass-card interactive-card rounded-xl p-6 text-center" onclick="openModal('tech-hw')">
-                    <i data-feather="cpu" class="mx-auto w-8 h-8 text-blue-500 mb-3"></i>
-                    <h3 class="font-bold dark:text-white text-gray-900">ESP32 & LoRa</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+                <div class="glass-card interactive-card rounded-xl p-4 sm:p-6 text-center" onclick="openModal('tech-hw')">
+                    <i data-feather="cpu" class="mx-auto w-6 h-6 sm:w-8 sm:h-8 text-blue-500 mb-2 sm:mb-3"></i>
+                    <h3 class="text-sm sm:text-base font-bold dark:text-white text-gray-900">ESP32 & LoRa</h3>
                 </div>
-                <div class="glass-card interactive-card rounded-xl p-6 text-center" onclick="openModal('tech-backend')">
-                    <i data-feather="server" class="mx-auto w-8 h-8 text-green-500 mb-3"></i>
-                    <h3 class="font-bold dark:text-white text-gray-900">Python & MQTT</h3>
+                <div class="glass-card interactive-card rounded-xl p-4 sm:p-6 text-center" onclick="openModal('tech-backend')">
+                    <i data-feather="server" class="mx-auto w-6 h-6 sm:w-8 sm:h-8 text-green-500 mb-2 sm:mb-3"></i>
+                    <h3 class="text-sm sm:text-base font-bold dark:text-white text-gray-900">Python & MQTT</h3>
                 </div>
-                <div class="glass-card interactive-card rounded-xl p-6 text-center" onclick="openModal('tech-db')">
-                    <i data-feather="database" class="mx-auto w-8 h-8 text-purple-500 mb-3"></i>
-                    <h3 class="font-bold dark:text-white text-gray-900">InfluxDB</h3>
+                <div class="glass-card interactive-card rounded-xl p-4 sm:p-6 text-center" onclick="openModal('tech-db')">
+                    <i data-feather="database" class="mx-auto w-6 h-6 sm:w-8 sm:h-8 text-purple-500 mb-2 sm:mb-3"></i>
+                    <h3 class="text-sm sm:text-base font-bold dark:text-white text-gray-900">InfluxDB</h3>
                 </div>
-                <div class="glass-card interactive-card rounded-xl p-6 text-center" onclick="openModal('tech-frontend')">
-                    <i data-feather="layout" class="mx-auto w-8 h-8 text-orange-500 mb-3"></i>
-                    <h3 class="font-bold dark:text-white text-gray-900">React Dashboard</h3>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="roadmap" class="relative py-24 px-6 bg-gray-50/50 dark:bg-transparent transition-colors">
-        <div class="max-w-4xl mx-auto">
-            <div class="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent mb-20"></div>
-            
-            <div class="text-center mb-16">
-                <div class="mono text-sm text-indigo-500 uppercase tracking-wider mb-4" data-i18n="sec_road_sub">04 / Plán Projektu</div>
-                <h2 class="text-3xl md:text-4xl font-bold mb-6 dark:text-white text-gray-900" data-i18n="sec_road_title">Status Vývoje</h2>
-            </div>
-            
-            <div class="glass-card rounded-2xl p-8 relative">
-                <div class="absolute left-8 top-8 bottom-8 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
-                
-                <div class="relative pl-12 mb-10">
-                    <div class="absolute left-6 top-1.5 w-4 h-4 rounded-full bg-green-500 border-4 border-white dark:border-gray-800 -translate-x-1/2"></div>
-                    <h3 class="text-xl font-bold dark:text-white text-gray-900 mb-2" data-i18n="ph0_title">Fáze 0: Koncept & Web</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        <span data-i18n="ph0_desc">Definice cílů, nákup domény, vytvoření prezentační stránky (Tato stránka).</span>
-                        <span class="inline-block px-2 py-0.5 mt-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-xs font-bold" data-i18n="status_done">DOKONČENO</span>
-                    </p>
-                </div>
-                
-                <div class="relative pl-12 mb-10">
-                    <div class="absolute left-6 top-1.5 w-4 h-4 rounded-full bg-blue-500 border-4 border-white dark:border-gray-800 -translate-x-1/2 animate-pulse"></div>
-                    <h3 class="text-xl font-bold dark:text-white text-gray-900 mb-2" data-i18n="ph1_title">Fáze 1: MVP (Probíhá)</h3>
-                    <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-2">
-                        <li data-i18n="ph1_l1">• Základní spojení ESP32 + BME280</li>
-                        <li data-i18n="ph1_l2">• LoRa P2P přenos na RPi</li>
-                        <li data-i18n="ph1_l3">• Ukládání do InfluxDB a zobrazení v Grafaně</li>
-                        <li data-i18n="ph1_l4">• Vývoj Carrier Board PCB</li>
-                    </ul>
-                    <span class="inline-block px-2 py-0.5 mt-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-bold" data-i18n="status_dev">VE VÝVOJI</span>
-                </div>
-                
-                <div class="relative pl-12">
-                    <div class="absolute left-6 top-1.5 w-4 h-4 rounded-full bg-gray-300 dark:bg-gray-600 border-4 border-white dark:border-gray-800 -translate-x-1/2"></div>
-                    <h3 class="text-xl font-bold dark:text-gray-400 text-gray-500 mb-2" data-i18n="ph2_title">Fáze 2: Finální Produkt</h3>
-                    <p class="text-sm text-gray-400 dark:text-gray-500" data-i18n="ph2_desc">
-                        Pokročilé senzory (blesky, vítr), 3D tištěné kryty IP65, vlastní React Dashboard, AI detekce anomálií.
-                    </p>
+                <div class="glass-card interactive-card rounded-xl p-4 sm:p-6 text-center" onclick="openModal('tech-frontend')">
+                    <i data-feather="layout" class="mx-auto w-6 h-6 sm:w-8 sm:h-8 text-orange-500 mb-2 sm:mb-3"></i>
+                    <h3 class="text-sm sm:text-base font-bold dark:text-white text-gray-900">React Dashboard</h3>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="relative py-12 px-6 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0b0d17] transition-colors">
-    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-        <div class="flex flex-col items-center md:items-start gap-4">
-            <img src="./kopie.png" alt="SkySensor" class="h-6 block dark:hidden">
-            <img src="./kopie.png" alt="SkySensor" class="h-6 hidden dark:block">
-            <p class="text-xs text-gray-500" data-i18n="footer_copy">© 2026 Všechna práva vyhrazena.</p>
+<section id="roadmap" class="relative py-12 sm:py-24 px-4 sm:px-6 bg-gray-50/50 dark:bg-transparent transition-colors">
+    <div class="max-w-4xl mx-auto">
+        <div class="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent mb-12 sm:mb-20"></div>
+        
+        <div class="text-center mb-8 sm:mb-16 px-2">
+            <div class="mono text-xs sm:text-sm text-indigo-500 uppercase tracking-wider mb-3 sm:mb-4" data-i18n="sec_road_sub">04 / Plán Projektu</div>
+            <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 dark:text-white text-gray-900" data-i18n="sec_road_title">Harmonogram Vývoje</h2>
+            <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 max-w-xl mx-auto" data-i18n="sec_road_desc">
+                Projekt je rozdělen do navazujících fází od teoretické analýzy po finální integraci hardwaru a softwaru.
+            </p>
         </div>
         
-        <div class="flex flex-col md:flex-row items-center gap-6 text-sm text-gray-500">
-            <button onclick="copyEmail()" class="relative flex items-center gap-2 hover:text-indigo-500 transition-all group">
+        <div id="roadmap-container" class="glass-card rounded-2xl p-4 sm:p-6 md:p-8 relative min-h-[300px] sm:min-h-[400px]">
+            <!-- Roadmap will be rendered here -->
+        </div>
+    </div>
+</section>
+
+<footer class="relative py-8 sm:py-12 px-4 sm:px-6 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0b0d17] transition-colors">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center gap-8 sm:gap-12 md:gap-24">
+        
+        <div class="flex flex-col items-center order-2 md:order-1">
+            <button onclick="copyEmail()" class="relative flex items-center gap-2 hover:text-indigo-500 transition-all group text-xs sm:text-sm text-gray-500 p-2">
                 <i data-feather="mail" class="w-4 h-4"></i>
                 <span id="email-text">info@skysensor.tech</span>
                 <span id="copy-toast" class="absolute -top-8 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] py-1 px-2 rounded opacity-0 transition-opacity pointer-events-none" data-i18n="copied">Zkopírováno!</span>
             </button>
-            <div class="flex gap-6">
-                <a href="#" class="hover:text-indigo-500 transition-colors" data-i18n="footer_docs">Dokumentace</a>
-                <a href="#" class="hover:text-indigo-500 transition-colors">GitHub</a>
-            </div>
         </div>
+
+        <div class="flex flex-col items-center gap-3 order-1 md:order-2">
+            <a href="#" class="block">
+                <img src="./skysensor_black.png" alt="SkySensor" class="h-6 sm:h-7 block dark:hidden mx-auto">
+                <img src="./skysensor_white.png" alt="SkySensor" class="h-6 sm:h-7 hidden dark:block mx-auto">
+            </a>
+            <p class="text-xs text-gray-500 text-center" data-i18n="footer_copy">© 2026 Všechna práva vyhrazena.</p>
+        </div>
+        
     </div>
 </footer>
 
-    <div id="modal-overlay" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="modal-content w-full max-w-2xl bg-white dark:bg-[#1a1c2c] rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+    <div id="modal-overlay" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm">
+        <div class="modal-content w-full max-w-2xl bg-white dark:bg-[#1a1c2c] rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
             
-            <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-[#1a1c2c] z-10">
-                <h3 id="modal-title" class="text-2xl font-bold dark:text-white text-gray-900">Titulek</h3>
+            <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-[#1a1c2c] z-10">
+                <h3 id="modal-title" class="text-lg sm:text-xl md:text-2xl font-bold dark:text-white text-gray-900">Titulek</h3>
                 <button onclick="closeModal()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group">
-                    <i data-feather="x" class="w-6 h-6 text-gray-500 group-hover:text-red-500 transition-colors"></i>
+                    <i data-feather="x" class="w-5 h-5 sm:w-6 sm:h-6 text-gray-500 group-hover:text-red-500 transition-colors"></i>
                 </button>
             </div>
             
-            <div id="modal-body" class="p-6 overflow-y-auto text-gray-600 dark:text-gray-300 leading-relaxed">
+            <div id="modal-body" class="p-4 sm:p-6 overflow-y-auto text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
             </div>
             
-            <div class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#151725] flex justify-end">
-                <button onclick="closeModal()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors" data-i18n="btn_close">
+            <div class="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#151725] flex justify-end">
+                <button onclick="closeModal()" class="px-4 sm:px-6 py-2 sm:py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base" data-i18n="btn_close">
                     Zavřít
                 </button>
             </div>
@@ -432,6 +556,41 @@
     </div>
 
     <script>
+        // --- MOBILE MENU LOGIC ---
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const hamburger = document.querySelector('.hamburger');
+
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('active');
+            mobileMenuOverlay.classList.toggle('active');
+            hamburger.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            hamburger.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+        // Close mobile menu when clicking on links
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Close mobile menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+                closeMobileMenu();
+            }
+        });
+
         // --- TRANSLATION DATA ---
         const translations = {
             cs: {
@@ -439,13 +598,13 @@
                 nav_arch: "Architektura",
                 nav_tech: "Technologie",
                 nav_roadmap: "Roadmapa",
-                hero_badge: "STUDENTSKÝ PROJEKT 2026",
+                hero_badge: "STUDENTSKÝ PROJEKT 2026/2027",
                 hero_title_1: "Environmentální",
                 hero_title_2: "Inteligence",
                 hero_desc: "Modulární IoT platforma pro sběr meteorologických dat. Komplexní návrh od vlastního PCB hardwaru po cloudovou vizualizaci.",
                 btn_how: "Jak to funguje",
                 btn_stack: "Tech Stack",
-                stat_mvp: "Fáze 1",
+                stat_ui: "Přehledné rozhraní",
                 stat_lora: "P2P Komunikace",
                 stat_ip: "Cílové krytí",
                 sec_arch_sub: "02 / Architektura",
@@ -465,6 +624,7 @@
                 sec_tech_desc: "Klikněte pro technické detaily implementace.",
                 sec_road_sub: "04 / Plán Projektu",
                 sec_road_title: "Status Vývoje",
+                sec_road_desc: "Projekt je rozdělen do navazujících fází od teoretické analýzy po finální integraci hardwaru a softwaru.",
                 ph0_title: "Fáze 0: Koncept & Web",
                 ph0_desc: "Definice cílů, nákup domény, vytvoření prezentační stránky (Tato stránka).",
                 status_done: "DOKONČENO",
@@ -477,7 +637,6 @@
                 ph2_title: "Fáze 2: Finální Produkt",
                 ph2_desc: "Pokročilé senzory (blesky, vítr), 3D tištěné kryty IP65, vlastní React Dashboard, AI detekce anomálií.",
                 footer_copy: "© 2026 Všechna práva vyhrazena.",
-                footer_docs: "Dokumentace",
                 copied: "Zkopírováno!",
                 btn_close: "Zavřít"
             },
@@ -486,13 +645,13 @@
                 nav_arch: "Architecture",
                 nav_tech: "Technology",
                 nav_roadmap: "Roadmap",
-                hero_badge: "GRADUATION PROJECT 2026",
+                hero_badge: "GRADUATION PROJECT 2026/2027",
                 hero_title_1: "Environmental",
                 hero_title_2: "Intelligence",
                 hero_desc: "Modular IoT platform for meteorological data collection. Comprehensive design from custom PCB hardware to cloud visualization.",
                 btn_how: "How it works",
                 btn_stack: "Tech Stack",
-                stat_mvp: "Phase 1",
+                stat_ui: "Minimal design",
                 stat_lora: "P2P Communication",
                 stat_ip: "Target Protection",
                 sec_arch_sub: "02 / Architecture",
@@ -512,6 +671,7 @@
                 sec_tech_desc: "Click for technical implementation details.",
                 sec_road_sub: "04 / Roadmap",
                 sec_road_title: "Development Status",
+                sec_road_desc: "The project is divided into consecutive phases from theoretical analysis to final hardware and software integration.",
                 ph0_title: "Phase 0: Concept & Web",
                 ph0_desc: "Defining goals, domain purchase, creation of presentation site (This page).",
                 status_done: "COMPLETED",
@@ -524,11 +684,214 @@
                 ph2_title: "Phase 2: Final Product",
                 ph2_desc: "Advanced sensors (lightning, wind), 3D printed IP65 enclosures, custom React Dashboard, AI anomaly detection.",
                 footer_copy: "© 2026 All rights reserved.",
-                footer_docs: "Documentation",
                 copied: "Copied!",
                 btn_close: "Close"
             }
         };
+
+        // --- ROADMAP DATA ---
+        const roadmapData = [
+  {
+    "id": 1,
+    "status": "done",
+    "title": { "cs": "1. Analýza & Definice", "en": "1. Analysis & Definition" },
+    "badge": { "cs": "DOKONČENO", "en": "COMPLETED" },
+    "desc": {
+      "cs": "Stanovení cílů projektu a příprava infrastruktury.",
+      "en": "Defining project goals and preparing infrastructure."
+    },
+    "items": [
+      {
+        "cs": "Analýza zadání a definice modulů (A – venkovní, B – centrála)",
+        "en": "Assignment analysis and module definition (A – outdoor, B – central)"
+      },
+      {
+        "cs": "Návrh architektury systému a toku dat",
+        "en": "System architecture design and data flow definition"
+      },
+      {
+        "cs": "Zprovoznění webové prezentace a domény",
+        "en": "Launching web presentation and domain"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "status": "current",
+    "title": { "cs": "2. Návrh & Prototypování", "en": "2. Design & Prototyping" },
+    "badge": { "cs": "PRÁVĚ PROBÍHÁ", "en": "IN PROGRESS" },
+    "desc": {
+      "cs": "Technický návrh elektroniky a výběr komponent.",
+      "en": "Technical electronics design and component selection."
+    },
+    "items": [
+      {
+        "cs": "Výběr HW: ESP32, LoRa, Raspberry Pi a senzorů",
+        "en": "HW Selection: ESP32, LoRa, Raspberry Pi and sensors"
+      },
+      {
+        "cs": "Návrh PCB (Carrier Board) a elektroniky modulů",
+        "en": "PCB design (Carrier Board) and module electronics"
+      },
+      {
+        "cs": "3D modely: Kryt venkovní jednotky a case pro RPi (rozšíření)",
+        "en": "3D models: Outdoor enclosure and RPi case (extension)"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "status": "planned",
+    "title": { "cs": "3. Realizace & Vývoj SW", "en": "3. Realization & SW Dev" },
+    "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
+    "desc": {
+      "cs": "Fyzická výroba a programování backendu.",
+      "en": "Physical manufacturing and backend programming."
+    },
+    "items": [
+      {
+        "cs": "Výroba PCB, osazení a kompletace hardware",
+        "en": "PCB manufacturing, assembly and hardware completion"
+      },
+      {
+        "cs": "Vývoj FW pro ESP32: Čtení senzorů a LoRa komunikace",
+        "en": "ESP32 FW development: Sensor reading and LoRa comms"
+      },
+      {
+        "cs": "Backend: Příjem dat, databáze a REST API",
+        "en": "Backend: Data ingestion, database and REST API"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "status": "planned",
+    "title": { "cs": "4. UI & Integrace", "en": "4. UI & Integration" },
+    "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
+    "desc": {
+      "cs": "Finální vizualizace a otestování celku.",
+      "en": "Final visualization and system testing."
+    },
+    "items": [
+      {
+        "cs": "Vývoj webového rozhraní pro vizualizaci hodnot",
+        "en": "Web interface development for data visualization"
+      },
+      {
+        "cs": "Implementace AI pro detekci anomálií (rozšíření)",
+        "en": "AI implementation for anomaly detection (extension)"
+      },
+      {
+        "cs": "Celkové testování a technická dokumentace",
+        "en": "System testing and technical documentation"
+      }
+    ]
+  }
+];
+
+
+        // Načtení externího JSON souboru
+        fetch('./roadmap.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Nelze načíst soubor roadmap.json');
+                }
+                return response.json();
+            })
+            .then(data => {
+                roadmapData = data; // Uložení načtených dat do proměnné
+                renderRoadmap(); // Spuštění vykreslení až ve chvíli, kdy máme data
+            })
+            .catch(error => {
+                console.error('Chyba při načítání dat:', error);
+                const container = document.getElementById('roadmap-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="text-center p-8 text-gray-500">
+                            <p>Nepodařilo se načíst data plánu.</p>
+                            <p class="text-xs mt-2 opacity-70">(Pokud toto vidíte lokálně, spusťte web přes Live Server)</p>
+                        </div>`;
+                }
+            });
+
+        // --- RENDER ROADMAP ---
+        function renderRoadmap() {
+            const container = document.getElementById('roadmap-container');
+            if (!container) return;
+            
+            // Pokud ještě nejsou data načtena (pole je prázdné), nic nevykreslujeme (nebo můžeme dát loading)
+            if (roadmapData.length === 0) return;
+
+            let html = `<div class="absolute left-4 sm:left-8 top-10 bottom-10 w-0.5 bg-gray-200 dark:bg-gray-700"></div>`;
+
+            roadmapData.forEach(phase => {
+                // Ošetření, aby kód nespadl, pokud chybí překlad pro aktuální jazyk (fallback na 'cs')
+                const title = phase.title[currentLang] || phase.title['cs'];
+                const desc = phase.desc[currentLang] || phase.desc['cs'];
+                const badge = phase.badge ? (phase.badge[currentLang] || phase.badge['cs']) : '';
+                
+                let iconHtml = '';
+                let badgeHtml = '';
+                let opacityClass = '';
+                let borderClass = '';
+
+                if (phase.status === 'done') {
+                    iconHtml = `
+                        <div class="absolute left-4 sm:left-8 top-1.5 w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-green-500 border-2 sm:border-4 border-white dark:border-[#1a1c2c] -translate-x-1/2 flex items-center justify-center shadow-lg shadow-green-500/30">
+                            <i data-feather="check" class="w-2 h-2 sm:w-3 sm:h-3 text-white"></i>
+                        </div>`;
+                    if (badge) {
+                        badgeHtml = `<span class="ml-2 inline-block px-2 py-0.5 text-[9px] sm:text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded uppercase tracking-wide font-bold">${badge}</span>`;
+                    }
+                    borderClass = 'border-green-500/20';
+                } 
+                else if (phase.status === 'current') {
+                    iconHtml = `
+                        <div class="absolute left-4 sm:left-8 top-1.5 w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-indigo-500 border-2 sm:border-4 border-white dark:border-[#1a1c2c] -translate-x-1/2 shadow-lg shadow-indigo-500/30">
+                            <div class="absolute inset-0 rounded-full animate-ping bg-indigo-500 opacity-75"></div>
+                        </div>`;
+                    if (badge) {
+                        badgeHtml = `<span class="ml-2 inline-block px-2 py-0.5 text-[9px] sm:text-[10px] bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded uppercase tracking-wide font-bold">${badge}</span>`;
+                    }
+                    borderClass = 'border-indigo-500/20';
+                } 
+                else {
+                    iconHtml = `
+                        <div class="absolute left-4 sm:left-8 top-1.5 w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gray-200 dark:bg-gray-700 border-2 sm:border-4 border-white dark:border-[#1a1c2c] -translate-x-1/2"></div>`;
+                    opacityClass = 'opacity-80';
+                    borderClass = 'border-gray-300 dark:border-gray-700';
+                    if (badge) { // Pokud je badge i u plánovaných (např. PLÁNOVÁNO)
+                         badgeHtml = `<span class="ml-2 inline-block px-2 py-0.5 text-[9px] sm:text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded uppercase tracking-wide font-bold">${badge}</span>`;
+                    }
+                }
+
+                const listItems = phase.items.map(item => 
+                    `<li class="text-xs sm:text-sm">• ${item[currentLang] || item['cs']}</li>`
+                ).join('');
+
+                html += `
+                    <div class="relative pl-8 sm:pl-12 mb-8 sm:mb-12 ${opacityClass}">
+                        ${iconHtml}
+                        <h3 class="text-base sm:text-lg md:text-xl font-bold dark:text-white text-gray-900 mb-1 sm:mb-2">
+                            ${title} ${badgeHtml}
+                        </h3>
+                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2 sm:mb-3">
+                            ${desc}
+                        </p>
+                        <ul class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 space-y-1 sm:space-y-2 border-l-2 ${borderClass} pl-3 sm:pl-4">
+                            ${listItems}
+                        </ul>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            
+            // Obnovení ikonek (Feather icons), protože jsme právě přepsali HTML
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+        }
 
         // --- ICONS & THEME ---
         const themeToggle = document.getElementById('theme-toggle');
@@ -544,12 +907,10 @@
         try {
             updateIcon(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
         } catch(e) {
-            // Fallback if initial check fails
             updateIcon('light');
         }
 
         themeToggle.addEventListener('click', function() {
-            // Try-catch pro localStorage zápis
             try {
                 if (document.documentElement.classList.contains('dark')) {
                     document.documentElement.classList.remove('dark');
@@ -561,7 +922,6 @@
                     updateIcon('dark');
                 }
             } catch (e) {
-                // Fallback bez ukládání do localStorage
                 if (document.documentElement.classList.contains('dark')) {
                     document.documentElement.classList.remove('dark');
                     updateIcon('light');
@@ -583,35 +943,34 @@
         }
 
         function setLanguage(lang) {
-            // 1. Spustit fade-out
             document.body.classList.add('lang-switching');
 
-            // 2. Počkat na animaci (300ms)
             setTimeout(() => {
                 currentLang = lang;
                 langToggle.innerText = lang === 'cs' ? 'CZ' : 'EN';
+                
                 try {
                     localStorage.setItem('language', lang);
-                } catch(e) {} // Ignorovat chybu zápisu
+                } catch(e) {}
+                
                 updateTexts(lang);
                 
-                // 3. Spustit fade-in
+                if (typeof renderRoadmap === 'function') {
+                    renderRoadmap();
+                }
+                
                 document.body.classList.remove('lang-switching');
             }, 300);
         }
 
-        // Language Initialization (ROBUSTNÍ PRO BRAVE)
         function initLanguage() {
-            let targetLang = 'en'; // Výchozí fallback
+            let targetLang = 'en';
 
             try {
-                // 1. Zkontroluj uložené nastavení (má přednost)
                 if (localStorage.getItem('language')) {
                     targetLang = localStorage.getItem('language');
                 } 
-                // 2. Detekce systému/prohlížeče (Vylepšená pro Brave)
                 else {
-                    // Zkusíme najít 'cs' nebo 'sk' v seznamu všech jazyků, ne jen v hlavním
                     const langs = navigator.languages || [navigator.language || navigator.userLanguage];
                     const isCzechOrSlovak = langs.some(lang => 
                         lang.toLowerCase().startsWith('cs') || 
@@ -625,15 +984,14 @@
                     }
                 }
             } catch(e) {
-                // Pokud Brave blokuje čtení, zkusíme aspoň základní navigator
                 const lang = (navigator.language || 'en').toLowerCase();
                 if (lang.startsWith('cs') || lang.startsWith('sk')) targetLang = 'cs';
             }
             
-            // Nastavení bez animace pro start stránky
             currentLang = targetLang;
             langToggle.innerText = targetLang === 'cs' ? 'CZ' : 'EN';
             updateTexts(targetLang);
+            renderRoadmap();
         }
 
         langToggle.addEventListener('click', () => {
@@ -643,6 +1001,7 @@
 
         // Run init
         initLanguage();
+        feather.replace();
 
         // --- UTILS ---
         function copyEmail() {
@@ -660,64 +1019,64 @@
                 title_cs: 'Modul A: Venkovní měřicí jednotka',
                 title_en: 'Module A: Outdoor Measurement Unit',
                 content_cs: `
-                    <div class="space-y-4">
+                    <div class="space-y-3 sm:space-y-4">
                         <p class="font-medium text-indigo-500">Primární sběr dat z prostředí.</p>
-                        <p>Autonomní venkovní jednotka navržená pro dlouhodobý provoz. Je postavena na vlastním navrženém "Carrier Board" PCB.</p>
-                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Hardware Specifikace:</h4>
-                        <ul class="list-disc pl-5 space-y-1">
+                        <p class="text-sm sm:text-base">Autonomní venkovní jednotka navržená pro dlouhodobý provoz. Je postavena na vlastním navrženém "Carrier Board" PCB.</p>
+                        <h4 class="font-bold text-base sm:text-lg dark:text-white text-gray-900 mt-3 sm:mt-4">Hardware Specifikace:</h4>
+                        <ul class="list-disc pl-4 sm:pl-5 space-y-1 text-sm sm:text-base">
                             <li><strong>MCU:</strong> ESP32 (WROOM-32) - zvolen pro deep-sleep režimy a výkon.</li>
                             <li><strong>Komunikace:</strong> LoRa modul RFM95 (868 MHz) v P2P režimu pro dlouhý dosah.</li>
                             <li><strong>Základní senzory:</strong> BME280 (Tlak, Teplota, Vlhkost).</li>
                             <li><strong>Pokročilé senzory (Fáze 2):</strong> AS3935 (Detektor blesků), srážkoměr, anemometr.</li>
                         </ul>
-                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Konstrukce:</h4>
-                        <p>3D tištěný kryt z materiálu ASA/PETG splňující standard IP65. Obsahuje radiační štít pro přesné měření teploty.</p>
+                        <h4 class="font-bold text-base sm:text-lg dark:text-white text-gray-900 mt-3 sm:mt-4">Konstrukce:</h4>
+                        <p class="text-sm sm:text-base">3D tištěný kryt z materiálu ASA/PETG splňující standard IP65. Obsahuje radiační štít pro přesné měření teploty.</p>
                     </div>`,
                 content_en: `
-                    <div class="space-y-4">
+                    <div class="space-y-3 sm:space-y-4">
                         <p class="font-medium text-indigo-500">Primary environmental data collection.</p>
-                        <p>Autonomous outdoor unit designed for long-term operation. Built on a custom-designed "Carrier Board" PCB.</p>
-                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Hardware Specs:</h4>
-                        <ul class="list-disc pl-5 space-y-1">
+                        <p class="text-sm sm:text-base">Autonomous outdoor unit designed for long-term operation. Built on a custom-designed "Carrier Board" PCB.</p>
+                        <h4 class="font-bold text-base sm:text-lg dark:text-white text-gray-900 mt-3 sm:mt-4">Hardware Specs:</h4>
+                        <ul class="list-disc pl-4 sm:pl-5 space-y-1 text-sm sm:text-base">
                             <li><strong>MCU:</strong> ESP32 (WROOM-32) - chosen for deep-sleep modes and performance.</li>
                             <li><strong>Communication:</strong> LoRa RFM95 module (868 MHz) in P2P mode for long range.</li>
                             <li><strong>Basic Sensors:</strong> BME280 (Pressure, Temperature, Humidity).</li>
                             <li><strong>Advanced Sensors (Phase 2):</strong> AS3935 (Lightning detector), rain gauge, anemometer.</li>
                         </ul>
-                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Construction:</h4>
-                        <p>3D printed enclosure made of ASA/PETG meeting IP65 standard. Includes a radiation shield for accurate temperature measurement.</p>
+                        <h4 class="font-bold text-base sm:text-lg dark:text-white text-gray-900 mt-3 sm:mt-4">Construction:</h4>
+                        <p class="text-sm sm:text-base">3D printed enclosure made of ASA/PETG meeting IP65 standard. Includes a radiation shield for accurate temperature measurement.</p>
                     </div>`
             },
             'module-b': {
                 title_cs: 'Modul B: Headless Server',
                 title_en: 'Module B: Headless Server',
                 content_cs: `
-                    <div class="space-y-4">
+                    <div class="space-y-3 sm:space-y-4">
                         <p class="font-medium text-indigo-500">Centrální mozek a brána systému.</p>
-                        <p>Vnitřní jednotka běžící v "headless" režimu (bez monitoru). Slouží jako most mezi LoRa sítí a domácí LAN/Cloudem.</p>
-                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Funkcionalita:</h4>
-                        <ul class="list-disc pl-5 space-y-1">
+                        <p class="text-sm sm:text-base">Vnitřní jednotka běžící v "headless" režimu (bez monitoru). Slouží jako most mezi LoRa sítí a domácí LAN/Cloudem.</p>
+                        <h4 class="font-bold text-base sm:text-lg dark:text-white text-gray-900 mt-3 sm:mt-4">Funkcionalita:</h4>
+                        <ul class="list-disc pl-4 sm:pl-5 space-y-1 text-sm sm:text-base">
                             <li><strong>Hardware:</strong> Raspberry Pi 4B/5 v chlazené krabičce.</li>
                             <li><strong>Příjem dat:</strong> Python skript naslouchající na LoRa modulu.</li>
                             <li><strong>MQTT Broker:</strong> Eclipse Mosquitto pro distribuci zpráv.</li>
                             <li><strong>Databáze:</strong> InfluxDB pro ukládání časových řad a historickou analýzu.</li>
                         </ul>
-                        <p class="text-sm bg-gray-100 dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 mt-2">
+                        <p class="text-xs sm:text-sm bg-gray-100 dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 mt-2">
                             Obsahuje také vlastní interní senzor BME280 pro měření podmínek v technické místnosti.
                         </p>
                     </div>`,
                 content_en: `
-                    <div class="space-y-4">
+                    <div class="space-y-3 sm:space-y-4">
                         <p class="font-medium text-indigo-500">Central brain and system gateway.</p>
-                        <p>Indoor unit running in "headless" mode (monitor-less). Serves as a bridge between the LoRa network and home LAN/Cloud.</p>
-                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Functionality:</h4>
-                        <ul class="list-disc pl-5 space-y-1">
+                        <p class="text-sm sm:text-base">Indoor unit running in "headless" mode (monitor-less). Serves as a bridge between the LoRa network and home LAN/Cloud.</p>
+                        <h4 class="font-bold text-base sm:text-lg dark:text-white text-gray-900 mt-3 sm:mt-4">Functionality:</h4>
+                        <ul class="list-disc pl-4 sm:pl-5 space-y-1 text-sm sm:text-base">
                             <li><strong>Hardware:</strong> Raspberry Pi 4B/5 in a cooled case.</li>
                             <li><strong>Data Reception:</strong> Python script listening on the LoRa module.</li>
                             <li><strong>MQTT Broker:</strong> Eclipse Mosquitto for message distribution.</li>
                             <li><strong>Database:</strong> InfluxDB for storing time series and historical analysis.</li>
                         </ul>
-                        <p class="text-sm bg-gray-100 dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 mt-2">
+                        <p class="text-xs sm:text-sm bg-gray-100 dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 mt-2">
                             Also includes its own internal BME280 sensor for measuring utility room conditions.
                         </p>
                     </div>`
@@ -726,50 +1085,50 @@
                 title_cs: 'Modul C: Klientské Rozhraní',
                 title_en: 'Module C: Client Interface',
                 content_cs: `
-                    <div class="space-y-4">
+                    <div class="space-y-3 sm:space-y-4">
                         <p class="font-medium text-indigo-500">Vizualizační vrstva pro uživatele.</p>
-                        <p>Moderní webová aplikace (Single Page Application) optimalizovaná pro zobrazení na nástěnném tabletu i mobilním telefonu.</p>
-                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Technologie:</h4>
-                        <ul class="list-disc pl-5 space-y-1">
+                        <p class="text-sm sm:text-base">Moderní webová aplikace (Single Page Application) optimalizovaná pro zobrazení na nástěnném tabletu i mobilním telefonu.</p>
+                        <h4 class="font-bold text-base sm:text-lg dark:text-white text-gray-900 mt-3 sm:mt-4">Technologie:</h4>
+                        <ul class="list-disc pl-4 sm:pl-5 space-y-1 text-sm sm:text-base">
                             <li><strong>Frontend:</strong> React / Vue.js.</li>
                             <li><strong>Hosting:</strong> Nginx běžící na Modulu B (RPi).</li>
                             <li><strong>Analytika:</strong> Grafana pro detailní grafy a historické trendy.</li>
                         </ul>
-                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Budoucí funkce:</h4>
-                        <p>Implementace AI (Machine Learning) pro detekci anomálií a predikci počasí.</p>
+                        <h4 class="font-bold text-base sm:text-lg dark:text-white text-gray-900 mt-3 sm:mt-4">Budoucí funkce:</h4>
+                        <p class="text-sm sm:text-base">Implementace AI (Machine Learning) pro detekci anomálií a predikci počasí.</p>
                     </div>`,
                 content_en: `
-                    <div class="space-y-4">
+                    <div class="space-y-3 sm:space-y-4">
                         <p class="font-medium text-indigo-500">Visualization layer for users.</p>
-                        <p>Modern web application (Single Page Application) optimized for display on a wall-mounted tablet or mobile phone.</p>
-                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Technologies:</h4>
-                        <ul class="list-disc pl-5 space-y-1">
+                        <p class="text-sm sm:text-base">Modern web application (Single Page Application) optimized for display on a wall-mounted tablet or mobile phone.</p>
+                        <h4 class="font-bold text-base sm:text-lg dark:text-white text-gray-900 mt-3 sm:mt-4">Technologies:</h4>
+                        <ul class="list-disc pl-4 sm:pl-5 space-y-1 text-sm sm:text-base">
                             <li><strong>Frontend:</strong> React / Vue.js.</li>
                             <li><strong>Hosting:</strong> Nginx running on Module B (RPi).</li>
                             <li><strong>Analytics:</strong> Grafana for detailed charts and historical trends.</li>
                         </ul>
-                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Future Features:</h4>
-                        <p>AI (Machine Learning) implementation for anomaly detection and weather prediction.</p>
+                        <h4 class="font-bold text-base sm:text-lg dark:text-white text-gray-900 mt-3 sm:mt-4">Future Features:</h4>
+                        <p class="text-sm sm:text-base">AI (Machine Learning) implementation for anomaly detection and weather prediction.</p>
                     </div>`
             },
             'module-d': {
                 title_cs: 'Modul D: Satelitní Uzel',
                 title_en: 'Module D: Satellite Node',
                 content_cs: `
-                    <div class="space-y-4">
+                    <div class="space-y-3 sm:space-y-4">
                         <p class="font-medium text-indigo-500">Demonstrace modularity a škálovatelnosti.</p>
-                        <p>Volitelný přídavný senzor pro specifická měření (např. sklep, půda), který ukazuje schopnost systému přijímat data z více zdrojů najednou.</p>
-                        <ul class="list-disc pl-5 space-y-1 mt-4">
+                        <p class="text-sm sm:text-base">Volitelný přídavný senzor pro specifická měření (např. sklep, půda), který ukazuje schopnost systému přijímat data z více zdrojů najednou.</p>
+                        <ul class="list-disc pl-4 sm:pl-5 space-y-1 mt-3 sm:mt-4 text-sm sm:text-base">
                             <li>Napájení z baterie (Li-Ion 18650).</li>
                             <li>Optimalizovaný Deep-Sleep režim.</li>
                             <li>Odesílá data do stejné brány (Modul B).</li>
                         </ul>
                     </div>`,
                 content_en: `
-                    <div class="space-y-4">
+                    <div class="space-y-3 sm:space-y-4">
                         <p class="font-medium text-indigo-500">Demonstrating modularity and scalability.</p>
-                        <p>Optional additional sensor for specific measurements (e.g., basement, attic), showing the system's ability to accept data from multiple sources simultaneously.</p>
-                        <ul class="list-disc pl-5 space-y-1 mt-4">
+                        <p class="text-sm sm:text-base">Optional additional sensor for specific measurements (e.g., basement, attic), showing the system's ability to accept data from multiple sources simultaneously.</p>
+                        <ul class="list-disc pl-4 sm:pl-5 space-y-1 mt-3 sm:mt-4 text-sm sm:text-base">
                             <li>Battery powered (Li-Ion 18650).</li>
                             <li>Optimized Deep-Sleep mode.</li>
                             <li>Sends data to the same gateway (Module B).</li>
@@ -813,19 +1172,28 @@
             modalTitle.innerText = currentLang === 'cs' ? data.title_cs : data.title_en;
             modalBody.innerHTML = currentLang === 'cs' ? data.content_cs : data.content_en;
             
+            const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+            
+            if (scrollbarWidth > 0) {
+                document.body.style.paddingRight = `${scrollbarWidth}px`;
+            }
+
             modalOverlay.classList.remove('hidden');
+            
             setTimeout(() => {
                 modalOverlay.classList.add('active');
             }, 10);
+            
             document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
             modalOverlay.classList.remove('active');
+            
             setTimeout(() => {
-                // modalOverlay.classList.add('hidden'); 
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
             }, 300);
-            document.body.style.overflow = '';
         }
 
         document.addEventListener('keydown', (e) => {
@@ -846,6 +1214,65 @@
         }, { threshold: 0.1 });
 
         document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const header = document.querySelector('header');
+                const headerHeight = header.offsetHeight;
+
+                if (targetId === '#') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    const section = document.querySelector(targetId);
+                    if (section) {
+                        const separator = section.querySelector('.h-px');
+                        
+                        let targetPosition;
+                        
+                        if (separator) {
+                            const separatorRect = separator.getBoundingClientRect();
+                            const absoluteSeparatorTop = separatorRect.top + window.scrollY;
+                            targetPosition = absoluteSeparatorTop - headerHeight;
+                        } else {
+                            const sectionRect = section.getBoundingClientRect();
+                            targetPosition = (sectionRect.top + window.scrollY) - headerHeight;
+                        }
+
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+        // --- OCHRANA PROTI KOPÍROVÁNÍ ---
+document.addEventListener('contextmenu', event => {
+    event.preventDefault(); // Zablokuje pravé tlačítko myši
+});
+
+document.addEventListener('keydown', function(event) {
+    // Zablokování F12 (Developer Tools)
+    if(event.key === 'F12') {
+        event.preventDefault();
+    }
+    // Zablokování Ctrl+U (Zdrojový kód)
+    if(event.ctrlKey && (event.key === 'u' || event.key === 'U')) {
+        event.preventDefault();
+    }
+    // Zablokování Ctrl+S (Uložit stránku)
+    if(event.ctrlKey && (event.key === 's' || event.key === 'S')) {
+        event.preventDefault();
+    }
+    // Zablokování Ctrl+Shift+I (Developer Tools)
+    if(event.ctrlKey && event.shiftKey && (event.key === 'i' || event.key === 'I')) {
+        event.preventDefault();
+    }
+});
     </script>
 </body>
 </html>
