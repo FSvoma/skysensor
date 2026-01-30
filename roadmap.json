@@ -1,0 +1,98 @@
+[
+  {
+    "id": 1,
+    "status": "done",
+    "title": { "cs": "1. Analýza & Definice", "en": "1. Analysis & Definition" },
+    "badge": { "cs": "DOKONČENO", "en": "COMPLETED" },
+    "desc": {
+      "cs": "Stanovení cílů projektu a příprava infrastruktury.",
+      "en": "Defining project goals and preparing infrastructure."
+    },
+    "items": [
+      {
+        "cs": "Analýza zadání a definice modulů (A – venkovní, B – centrála)",
+        "en": "Assignment analysis and module definition (A – outdoor, B – central)"
+      },
+      {
+        "cs": "Návrh architektury systému a toku dat",
+        "en": "System architecture design and data flow definition"
+      },
+      {
+        "cs": "Zprovoznění webové prezentace a domény",
+        "en": "Launching web presentation and domain"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "status": "current",
+    "title": { "cs": "2. Návrh & Prototypování", "en": "2. Design & Prototyping" },
+    "badge": { "cs": "PRÁVĚ PROBÍHÁ", "en": "IN PROGRESS" },
+    "desc": {
+      "cs": "Technický návrh elektroniky a výběr komponent.",
+      "en": "Technical electronics design and component selection."
+    },
+    "items": [
+      {
+        "cs": "Výběr HW: ESP32, LoRa, Raspberry Pi a senzorů",
+        "en": "HW Selection: ESP32, LoRa, Raspberry Pi and sensors"
+      },
+      {
+        "cs": "Návrh PCB (Carrier Board) a elektroniky modulů",
+        "en": "PCB design (Carrier Board) and module electronics"
+      },
+      {
+        "cs": "3D modely: Kryt venkovní jednotky a case pro RPi (rozšíření)",
+        "en": "3D models: Outdoor enclosure and RPi case (extension)"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "status": "planned",
+    "title": { "cs": "3. Realizace & Vývoj SW", "en": "3. Realization & SW Dev" },
+    "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
+    "desc": {
+      "cs": "Fyzická výroba a programování backendu.",
+      "en": "Physical manufacturing and backend programming."
+    },
+    "items": [
+      {
+        "cs": "Výroba PCB, osazení a kompletace hardware",
+        "en": "PCB manufacturing, assembly and hardware completion"
+      },
+      {
+        "cs": "Vývoj FW pro ESP32: Čtení senzorů a LoRa komunikace",
+        "en": "ESP32 FW development: Sensor reading and LoRa comms"
+      },
+      {
+        "cs": "Backend: Příjem dat, databáze a REST API",
+        "en": "Backend: Data ingestion, database and REST API"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "status": "planned",
+    "title": { "cs": "4. UI & Integrace", "en": "4. UI & Integration" },
+    "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
+    "desc": {
+      "cs": "Finální vizualizace a otestování celku.",
+      "en": "Final visualization and system testing."
+    },
+    "items": [
+      {
+        "cs": "Vývoj webového rozhraní pro vizualizaci hodnot",
+        "en": "Web interface development for data visualization"
+      },
+      {
+        "cs": "Implementace AI pro detekci anomálií (rozšíření)",
+        "en": "AI implementation for anomaly detection (extension)"
+      },
+      {
+        "cs": "Celkové testování a technická dokumentace",
+        "en": "System testing and technical documentation"
+      }
+    ]
+  }
+]
