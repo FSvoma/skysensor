@@ -751,103 +751,223 @@
                 .catch(error => {
                     console.error('Chyba roadmapy:', error);
                     roadmapData = [
-                        {
-                            "id": 1,
-                            "status": "done",
-                            "title": { "cs": "1. Analýza & Definice", "en": "1. Analysis & Definition" },
-                            "badge": { "cs": "DOKONČENO", "en": "COMPLETED" },
-                            "desc": {
-                                "cs": "Stanovení cílů projektu a příprava infrastruktury.",
-                                "en": "Defining project goals and preparing infrastructure."
-                            },
-                            "items": [
-                                {
-                                    "cs": "Analýza zadání a definice modulů (A – venkovní, B – centrála)",
-                                    "en": "Assignment analysis and module definition (A – outdoor, B – central)"
-                                },
-                                {
-                                    "cs": "Návrh architektury systému a toku dat",
-                                    "en": "System architecture design and data flow definition"
-                                },
-                                {
-                                    "cs": "Zprovoznění webové prezentace a domény",
-                                    "en": "Launching web presentation and domain"
-                                }
-                            ]
-                        },
-                        {
-                            "id": 2,
-                            "status": "current",
-                            "title": { "cs": "2. Návrh & Prototypování", "en": "2. Design & Prototyping" },
-                            "badge": { "cs": "PRÁVĚ PROBÍHÁ", "en": "IN PROGRESS" },
-                            "desc": {
-                                "cs": "Technický návrh elektroniky a výběr komponent.",
-                                "en": "Technical electronics design and component selection."
-                            },
-                            "items": [
-                                {
-                                    "cs": "Výběr HW: ESP32, LoRa, Raspberry Pi a senzorů",
-                                    "en": "HW Selection: ESP32, LoRa, Raspberry Pi and sensors"
-                                },
-                                {
-                                    "cs": "Návrh PCB (Carrier Board) a elektroniky modulů",
-                                    "en": "PCB design (Carrier Board) and module electronics"
-                                },
-                                {
-                                    "cs": "3D modely: Kryt venkovní jednotky a case pro RPi (rozšíření)",
-                                    "en": "3D models: Outdoor enclosure and RPi case (extension)"
-                                }
-                            ]
-                        },
-                        {
-                            "id": 3,
-                            "status": "planned",
-                            "title": { "cs": "3. Realizace & Vývoj SW", "en": "3. Realization & SW Dev" },
-                            "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
-                            "desc": {
-                                "cs": "Fyzická výroba a programování backendu.",
-                                "en": "Physical manufacturing and backend programming."
-                            },
-                            "items": [
-                                {
-                                    "cs": "Výroba PCB, osazení a kompletace hardware",
-                                    "en": "PCB manufacturing, assembly and hardware completion"
-                                },
-                                {
-                                    "cs": "Vývoj FW pro ESP32: Čtení senzorů a LoRa komunikace",
-                                    "en": "ESP32 FW development: Sensor reading and LoRa comms"
-                                },
-                                {
-                                    "cs": "Backend: Příjem dat, databáze a REST API",
-                                    "en": "Backend: Data ingestion, database and REST API"
-                                }
-                            ]
-                        },
-                        {
-                            "id": 4,
-                            "status": "planned",
-                            "title": { "cs": "4. UI & Integrace", "en": "4. UI & Integration" },
-                            "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
-                            "desc": {
-                                "cs": "Finální vizualizace a otestování celku.",
-                                "en": "Final visualization and system testing."
-                            },
-                            "items": [
-                                {
-                                    "cs": "Vývoj webového rozhraní pro vizualizaci hodnot",
-                                    "en": "Web interface development for data visualization"
-                                },
-                                {
-                                    "cs": "Implementace AI pro detekci anomálií (rozšíření)",
-                                    "en": "AI implementation for anomaly detection (extension)"
-                                },
-                                {
-                                    "cs": "Celkové testování a technická dokumentace",
-                                    "en": "System testing and technical documentation"
-                                }
-                            ]
-                        }
-                    ];
+  {
+    "id": 1,
+    "status": "done",
+    "title": { "cs": "1. Analýza & Cíle", "en": "1. Analysis & Goals" },
+    "badge": { "cs": "DOKONČENO", "en": "COMPLETED" },
+    "desc": {
+      "cs": "Základ projektu a rozdělení systému na moduly.",
+      "en": "Project foundation and system modularization."
+    },
+    "items": [
+      {
+        "cs": "Analýza zadání a definice modulů A (venkovní), B (centrální), C (UI), D (satelitní)",
+        "en": "Assignment analysis and module definition (A – outdoor, B – central, C – UI, D – satellite)"
+      },
+      {
+        "cs": "Stanovení cílů, funkčních požadavků a provozních podmínek",
+        "en": "Goal setting, functional requirements and operational conditions"
+      },
+      {
+        "cs": "Zprovoznění webové prezentace a domény skysensor.tech",
+        "en": "Launch of web presentation and domain skysensor.tech"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "status": "done",
+    "title": { "cs": "2. Koncepce & Architektura", "en": "2. Concept & Architecture" },
+    "badge": { "cs": "DOKONČENO", "en": "COMPLETED" },
+    "desc": {
+      "cs": "Návrh celkové architektury, komunikace a toku dat.",
+      "en": "Overall system architecture, communication and data flow design."
+    },
+    "items": [
+      {
+        "cs": "Návrh architektury systému a blokové schéma",
+        "en": "System architecture design and block diagram"
+      },
+      {
+        "cs": "Určení rolí modulů a způsobů vzájemné komunikace",
+        "en": "Definition of module roles and inter-module communication"
+      },
+      {
+        "cs": "Návrh toku dat od senzorů po vizualizaci",
+        "en": "Data flow design from sensors to visualization"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "status": "current",
+    "title": { "cs": "3. Výběr HW & Návrh", "en": "3. HW Selection & Design" },
+    "badge": { "cs": "PRÁVĚ PROBÍHÁ", "en": "IN PROGRESS" },
+    "desc": {
+      "cs": "Výběr komponent a návrh elektroniky a mechaniky.",
+      "en": "Component selection and electronics/mechanics design."
+    },
+    "items": [
+      {
+        "cs": "Výběr HW: ESP32, LoRa RFM95, Raspberry Pi, senzory (BME280, AS3935, atd.)",
+        "en": "HW Selection: ESP32, LoRa RFM95, Raspberry Pi, sensors (BME280, AS3935, etc.)"
+      },
+      {
+        "cs": "Návrh vlastního PCB (Carrier Board) pro Modul A",
+        "en": "Custom PCB design (Carrier Board) for Module A"
+      },
+      {
+        "cs": "Návrh 3D modelů: kryt venkovní jednotky (IP65) a krabičky pro RPi",
+        "en": "3D model design: outdoor enclosure (IP65) and RPi case"
+      },
+      {
+        "cs": "Řešení napájení, přepěťové ochrany a kabeláže",
+        "en": "Power supply, surge protection and cabling solutions"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "status": "planned",
+    "title": { "cs": "4. Realizace HW (MVP)", "en": "4. HW Realization (MVP)" },
+    "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
+    "desc": {
+      "cs": "Fyzická výroba a sestavení hardwaru pro MVP.",
+      "en": "Physical manufacturing and hardware assembly for MVP."
+    },
+    "items": [
+      {
+        "cs": "Výroba a osazení PCB (Carrier Board)",
+        "en": "PCB manufacturing and assembly"
+      },
+      {
+        "cs": "Zapojení senzorů, integrace LoRa modulu",
+        "en": "Sensor wiring, LoRa module integration"
+      },
+      {
+        "cs": "Mechanická montáž do 3D tištěných krytů",
+        "en": "Mechanical assembly into 3D printed enclosures"
+      },
+      {
+        "cs": "Základní oživení a kontrola funkčnosti",
+        "en": "Basic power-up and functionality check"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "status": "planned",
+    "title": { "cs": "5. Vývoj SW (MVP)", "en": "5. SW Development (MVP)" },
+    "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
+    "desc": {
+      "cs": "Vývoj firmwaru, backendu a základní vizualizace.",
+      "en": "Firmware, backend and basic visualization development."
+    },
+    "items": [
+      {
+        "cs": "Firmware pro ESP32: čtení BME280, odesílání přes LoRa",
+        "en": "ESP32 firmware: BME280 reading, LoRa transmission"
+      },
+      {
+        "cs": "Backend (RPi): Python skript pro příjem dat, InfluxDB",
+        "en": "Backend (RPi): Python script for data ingestion, InfluxDB"
+      },
+      {
+        "cs": "Základní vizualizace: nasazení Grafany",
+        "en": "Basic visualization: Grafana deployment"
+      },
+      {
+        "cs": "MQTT broker (Mosquitto) a základní API",
+        "en": "MQTT broker (Mosquitto) and basic API"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "status": "planned",
+    "title": { "cs": "6. Rozšíření na Finální Produkt", "en": "6. Extension to Final Product" },
+    "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
+    "desc": {
+      "cs": "Pokročilé senzory, vlastní UI, AI a satelitní uzel.",
+      "en": "Advanced sensors, custom UI, AI and satellite node."
+    },
+    "items": [
+      {
+        "cs": "Integrace pokročilých senzorů (AS3935, srážkoměr, anemometr)",
+        "en": "Integration of advanced sensors (AS3935, rain gauge, anemometer)"
+      },
+      {
+        "cs": "Vývoj vlastního React dashboardu (Modul C)",
+        "en": "Custom React dashboard development (Module C)"
+      },
+      {
+        "cs": "Implementace AI pro detekci anomálií a predikci",
+        "en": "AI implementation for anomaly detection and prediction"
+      },
+      {
+        "cs": "Vývoj a nasazení satelitního uzlu (Modul D)",
+        "en": "Satellite node development and deployment (Module D)"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "status": "planned",
+    "title": { "cs": "7. Integrace & Testování", "en": "7. Integration & Testing" },
+    "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
+    "desc": {
+      "cs": "Komplexní testování celého systému.",
+      "en": "Comprehensive system testing."
+    },
+    "items": [
+      {
+        "cs": "Propojení všech modulů a testování komunikace",
+        "en": "Interconnection of all modules and communication testing"
+      },
+      {
+        "cs": "Test přesnosti měření, stability napájení a dosahu LoRa",
+        "en": "Measurement accuracy, power stability and LoRa range testing"
+      },
+      {
+        "cs": "Zátěžové testy a ověření dlouhodobé spolehlivosti",
+        "en": "Load testing and long-term reliability verification"
+      },
+      {
+        "cs": "Ověření dostupnosti z klientských zařízení (tablet, mobil, PC)",
+        "en": "Client device accessibility verification (tablet, mobile, PC)"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "status": "planned",
+    "title": { "cs": "8. Dokumentace & Vyhodnocení", "en": "8. Documentation & Evaluation" },
+    "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
+    "desc": {
+      "cs": "Kompletní dokumentace a závěrečné vyhodnocení.",
+      "en": "Complete documentation and final evaluation."
+    },
+    "items": [
+      {
+        "cs": "Technická dokumentace: HW, SW, firmware, UI",
+        "en": "Technical documentation: HW, SW, firmware, UI"
+      },
+      {
+        "cs": "Uživatelský manuál a instalační příručka",
+        "en": "User manual and installation guide"
+      },
+      {
+        "cs": "Vyhodnocení splnění cílů a výkonu systému",
+        "en": "Goal achievement and system performance evaluation"
+      },
+      {
+        "cs": "Návrh dalšího rozvoje a vylepšení",
+        "en": "Proposal for further development and improvements"
+      }
+    ]
+  }
+];
                     renderRoadmap();
                 });
         }
