@@ -1,307 +1,595 @@
 <!DOCTYPE html>
-<html lang="cs" class="light">
+<html lang="cs" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkySensor Project | Modulární IoT Meteostanice</title>
+    <title>SkySensor — Maturitní IoT projekt</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/feather-icons"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        
-        /* Společné styly s Dashboardem */
-        body, .glass-card, header, .btn-primary {
-            transition: all 0.3s ease;
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        // Konfigurace Tailwind pro vlastní barvy a dark mode
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0b0d17',
+                        surface: '#1a1c2c',
+                        primary: '#6366f1'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Courier New', 'monospace'],
+                    }
+                }
+            }
         }
-        :root { color-scheme: light dark; }
         
-        /* AURORA POZADÍ (Stejné jako dashboard) */
-        body::before {
+        // Logika pro Dark Mode - musí být v head, aby se aplikovala hned
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+    <style>
+        /* Základní styly */
+        body {
+            background-color: #0b0d17;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+        
+        /* Světlý režim přepisy */
+        html:not(.dark) body {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* AURORA POZADÍ - Dark Mode */
+        .dark body::before {
             content: '';
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -10;
-            background: radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.1), transparent 40%),
-                        radial-gradient(circle at 80% 30%, rgba(99, 102, 241, 0.1), transparent 40%),
-                        radial-gradient(circle at 30% 80%, rgba(59, 130, 246, 0.1), transparent 40%);
-            animation: aurora-glow 20s linear infinite;
-        }
-        body.dark::before {
-             background: radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.15), transparent 50%),
+            background: radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.15), transparent 50%),
                         radial-gradient(circle at 80% 30%, rgba(99, 102, 241, 0.15), transparent 50%),
                         radial-gradient(circle at 30% 80%, rgba(59, 130, 246, 0.15), transparent 50%);
+            animation: aurora-glow 20s linear infinite;
         }
-        @keyframes aurora-glow { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.2); } 100% { transform: rotate(360deg) scale(1); } }
 
-        /* Vlastní třídy */
-        .glass-card {
-            @apply bg-white/60 dark:bg-[#1a1c2c]/60 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg dark:shadow-indigo-500/10 rounded-2xl;
+        /* AURORA POZADÍ - Light Mode */
+        html:not(.dark) body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -10;
+            background: radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.05), transparent 50%),
+                        radial-gradient(circle at 80% 30%, rgba(99, 102, 241, 0.05), transparent 50%);
         }
+        
+        @keyframes aurora-glow { 
+            0% { transform: rotate(0deg) scale(1); } 
+            50% { transform: rotate(180deg) scale(1.2); } 
+            100% { transform: rotate(360deg) scale(1); } 
+        }
+        
+        /* Glass Card Effect */
+        .glass-card {
+            background: rgba(26, 28, 44, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html:not(.dark) .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Interaktivní karty (jen ty, co mají akci) */
+        .interactive-card:hover {
+            transform: translateY(-4px);
+            cursor: pointer;
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+        }
+        
         .text-gradient {
-            background-clip: text; -webkit-background-clip: text; color: transparent;
+            background-clip: text; 
+            -webkit-background-clip: text; 
+            color: transparent;
             background-image: linear-gradient(to right, #6366f1, #a855f7, #ec4899);
         }
+        
+        /* Animace */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up { opacity: 0; animation: fadeInUp 0.8s ease-out forwards; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        
+        /* Status Dot */
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; position: relative; }
+        .status-dot::after {
+            content: ''; position: absolute; inset: -4px;
+            border: 2px solid #10b981; border-radius: 50%;
+            opacity: 0.3; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+        .modal-overlay.active {
+            opacity: 1; visibility: visible;
+        }
+        .modal-content {
+            transform: scale(0.95) translateY(20px);
+            transition: all 0.3s ease-in-out;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
     </style>
 </head>
-<body class="bg-gray-200 dark:bg-[#0b0d17] text-gray-900 dark:text-gray-100 min-h-screen flex flex-col">
-
-    <header class="sticky top-0 z-50 w-full px-4 py-4 bg-white/70 dark:bg-[#1a1c2c]/70 backdrop-blur-lg border-b border-white/10">
+<body class="antialiased transition-colors duration-300">
+    
+    <header class="sticky top-0 z-40 w-full px-4 py-4 backdrop-blur-lg border-b border-white/10 dark:bg-[#1a1c2c]/70 bg-white/70">
         <div class="container mx-auto max-w-7xl flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <i data-feather="cloud-lightning" class="text-indigo-600 dark:text-indigo-400"></i>
-                <span class="text-xl font-bold tracking-tight">SkySensor<span class="text-indigo-500">.tech</span></span>
+                <i data-feather="cloud" class="text-indigo-500"></i>
+                <span class="text-xl font-bold tracking-tight dark:text-white text-gray-900">SkySensor<span class="text-indigo-500">.tech</span></span>
+                <span class="mono text-xs text-gray-500 hidden sm:inline px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300">Maturitní projekt</span>
             </div>
-            <nav class="hidden md:flex items-center gap-6 font-medium text-sm">
-                <a href="#about" class="hover:text-indigo-500 transition-colors">O Projektu</a>
-                <a href="#modules" class="hover:text-indigo-500 transition-colors">Moduly</a>
-                <a href="#roadmap" class="hover:text-indigo-500 transition-colors">Plán</a>
-                <a href="#tech" class="hover:text-indigo-500 transition-colors">Technologie</a>
+            
+            <nav class="hidden md:flex items-center gap-6 font-medium text-sm text-gray-500 dark:text-gray-400">
+                <a href="#vision" class="hover:text-indigo-500 transition-colors">Vize</a>
+                <a href="#architecture" class="hover:text-indigo-500 transition-colors">Architektura</a>
+                <a href="#technology" class="hover:text-indigo-500 transition-colors">Technologie</a>
+                <a href="#roadmap" class="hover:text-indigo-500 transition-colors">Roadmapa</a>
             </nav>
-            <div class="flex items-center gap-3">
-                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                    <i data-feather="moon" class="w-5 h-5"></i>
+            
+            <div class="flex items-center gap-4">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <i id="theme-icon" data-feather="moon" class="w-5 h-5 dark:text-gray-200 text-gray-700"></i>
                 </button>
-                <a href="dashboard.html" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-lg shadow-indigo-500/30 transition-all active:scale-95">
-                    Otevřít App
-                </a>
+                <div class="flex items-center gap-2">
+                    <div class="status-dot"></div>
+                    <span class="mono text-xs text-gray-500 hidden sm:inline">Web Ready</span>
+                </div>
             </div>
         </div>
     </header>
 
-    <section class="relative pt-20 pb-32 px-4 overflow-hidden">
-        <div class="container mx-auto max-w-5xl text-center relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider mb-6 border border-indigo-200 dark:border-indigo-700/50">
-                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                Maturitní Projekt 2026/2027
+    <section class="relative min-h-screen flex items-center justify-center px-6 pt-20 pb-32 overflow-hidden">
+        <div class="max-w-6xl mx-auto text-center relative z-10">
+            <div class="fade-in-up inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-indigo-500/30 mb-8">
+                <span class="mono text-xs text-indigo-500 dark:text-indigo-400 uppercase tracking-wider font-bold">Studentský projekt 2026</span>
             </div>
-            <h1 class="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight leading-tight">
-                Modulární <span class="text-gradient">IoT Meteostanice</span> <br>budoucnosti.
+            
+            <h1 class="fade-in-up delay-1 text-5xl md:text-8xl font-bold mb-6 leading-tight dark:text-white text-gray-900">
+                Environmentální<br/>
+                <span class="text-gradient">Inteligence</span>
             </h1>
-            <p class="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed">
-                Komplexní systém pro sběr, přenos a vizualizaci dat. Důraz na spolehlivost, 
-                nízkou spotřebu a moderní DevOps postupy. Od hardwaru po cloud.
+            
+            <p class="fade-in-up delay-2 text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12 font-light leading-relaxed">
+                Modulární IoT platforma pro sběr meteorologických dat. Komplexní návrh od vlastního PCB hardwaru po cloudovou vizualizaci.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="#modules" class="px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-black font-bold rounded-xl hover:scale-105 transition-transform">
-                    Prozkoumat architekturu
+            
+            <div class="fade-in-up delay-3 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="#architecture" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-all hover:scale-105 shadow-lg shadow-indigo-500/30 w-full sm:w-auto">
+                    Jak to funguje
                 </a>
-                <a href="https://github.com" target="_blank" class="px-8 py-4 glass-card font-bold rounded-xl hover:bg-white/80 dark:hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
-                    <i data-feather="github" class="w-5 h-5"></i> GitHub
+                <a href="#technology" class="px-8 py-4 glass-card rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800/60 dark:text-white text-gray-800 w-full sm:w-auto transition-colors">
+                    <span>Tech Stack</span>
+                    <i data-feather="code" class="w-5 h-5"></i>
                 </a>
             </div>
-        </div>
-    </section>
-
-    <section id="about" class="py-20 px-4">
-        <div class="container mx-auto max-w-7xl">
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div class="glass-card p-8 md:p-12 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-indigo-500/20"></div>
-                    <h3 class="text-2xl font-bold mb-4">Cíle projektu</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                        Cílem této práce je komplexní návrh, konstrukce a dlouhodobé zprovoznění modulárního systému. 
-                        Nejde jen o prototyp, ale o <strong>robustní, dlouhodobě udržitelný systém</strong> řešící reálné provozní výzvy.
-                    </p>
-                    <ul class="space-y-3">
-                        <li class="flex items-center gap-3 text-sm font-medium"><i data-feather="check-circle" class="text-green-500 w-5 h-5"></i> Spolehlivost a Modularita</li>
-                        <li class="flex items-center gap-3 text-sm font-medium"><i data-feather="check-circle" class="text-green-500 w-5 h-5"></i> Energetická efektivita</li>
-                        <li class="flex items-center gap-3 text-sm font-medium"><i data-feather="check-circle" class="text-green-500 w-5 h-5"></i> Využití DevOps (CI/CD, Docker)</li>
-                    </ul>
+            
+            <div class="fade-in-up delay-4 grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 max-w-4xl mx-auto">
+                <div class="glass-card rounded-xl p-6 text-center">
+                    <div class="mono text-3xl font-bold text-indigo-500 dark:text-indigo-400 mb-2">MVP</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Fáze 1</div>
                 </div>
-                <div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="glass-card p-6 text-center hover:-translate-y-1 transition-transform">
-                            <i data-feather="cpu" class="w-10 h-10 mx-auto text-indigo-500 mb-4"></i>
-                            <h4 class="font-bold">Hardware</h4>
-                            <p class="text-xs text-gray-500 mt-2">ESP32 & Raspberry Pi</p>
-                        </div>
-                        <div class="glass-card p-6 text-center hover:-translate-y-1 transition-transform">
-                            <i data-feather="wifi" class="w-10 h-10 mx-auto text-blue-500 mb-4"></i>
-                            <h4 class="font-bold">LoRa P2P</h4>
-                            <p class="text-xs text-gray-500 mt-2">Dlouhý dosah</p>
-                        </div>
-                        <div class="glass-card p-6 text-center hover:-translate-y-1 transition-transform">
-                            <i data-feather="database" class="w-10 h-10 mx-auto text-purple-500 mb-4"></i>
-                            <h4 class="font-bold">InfluxDB</h4>
-                            <p class="text-xs text-gray-500 mt-2">Time-series data</p>
-                        </div>
-                        <div class="glass-card p-6 text-center hover:-translate-y-1 transition-transform">
-                            <i data-feather="layers" class="w-10 h-10 mx-auto text-pink-500 mb-4"></i>
-                            <h4 class="font-bold">Docker</h4>
-                            <p class="text-xs text-gray-500 mt-2">Kontejnerizace</p>
-                        </div>
-                    </div>
+                <div class="glass-card rounded-xl p-6 text-center">
+                    <div class="mono text-3xl font-bold text-purple-500 dark:text-purple-400 mb-2">LoRa</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">P2P Komunikace</div>
+                </div>
+                <div class="glass-card rounded-xl p-6 text-center">
+                    <div class="mono text-3xl font-bold text-green-500 dark:text-green-400 mb-2">IP65</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">Cílové krytí</div>
+                </div>
+                <div class="glass-card rounded-xl p-6 text-center">
+                    <div class="mono text-3xl font-bold text-yellow-500 dark:text-yellow-400 mb-2">Docker</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">CI/CD Pipeline</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="modules" class="py-20 px-4 bg-black/5 dark:bg-white/5">
-        <div class="container mx-auto max-w-7xl">
+    <section id="architecture" class="relative py-24 px-6 bg-gray-50/50 dark:bg-transparent transition-colors">
+        <div class="max-w-6xl mx-auto">
+            <div class="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent mb-20"></div>
+            
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Architektura Systému</h2>
-                <p class="text-gray-500 dark:text-gray-400">Projekt je koncepčně rozdělen na vzájemně propojené moduly.</p>
+                <div class="mono text-sm text-indigo-500 uppercase tracking-wider mb-4">02 / Architektura</div>
+                <h2 class="text-4xl md:text-5xl font-bold mb-6 dark:text-white text-gray-900">Přehled systému</h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+                    Systém je rozdělen do specializovaných modulů. Klikněte na jednotlivé karty pro detailní technickou specifikaci.
+                </p>
             </div>
-
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="glass-card p-8 relative border-t-4 border-t-indigo-500 hover:shadow-2xl transition-all">
-                    <div class="absolute -top-6 left-6 w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <span class="text-white font-bold text-xl">A</span>
-                    </div>
-                    <h3 class="mt-4 text-xl font-bold mb-2">Venkovní Jednotka</h3>
-                    <p class="text-sm text-gray-500 mb-4 uppercase tracking-widest font-semibold">Sběr Dat</p>
-                    <p class="text-gray-600 dark:text-gray-400 mb-6 text-sm leading-relaxed">
-                        Autonomní jednotka řízená ESP32. Čte data ze senzorů a odesílá je přes LoRa.
-                    </p>
-                    <div class="space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <div class="flex justify-between text-sm"><span>Senzory:</span> <span class="font-mono text-indigo-500">BME280, AS3935</span></div>
-                        <div class="flex justify-between text-sm"><span>Napájení:</span> <span class="font-mono text-indigo-500">12V/24V kabel</span></div>
-                        <div class="flex justify-between text-sm"><span>Krytí:</span> <span class="font-mono text-indigo-500">IP65 (3D tisk)</span></div>
-                    </div>
-                </div>
-
-                <div class="glass-card p-8 relative border-t-4 border-t-purple-500 hover:shadow-2xl transition-all transform md:-translate-y-4">
-                    <div class="absolute -top-6 left-6 w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <span class="text-white font-bold text-xl">B</span>
-                    </div>
-                    <h3 class="mt-4 text-xl font-bold mb-2">Centrální Server</h3>
-                    <p class="text-sm text-gray-500 mb-4 uppercase tracking-widest font-semibold">Zpracování & Brána</p>
-                    <p class="text-gray-600 dark:text-gray-400 mb-6 text-sm leading-relaxed">
-                        "Headless" Raspberry Pi server. Přijímá LoRa pakety, běží zde MQTT Broker, Databáze a API.
-                    </p>
-                    <div class="space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <div class="flex justify-between text-sm"><span>HW:</span> <span class="font-mono text-purple-500">RPi 4B/5 + LoRa HAT</span></div>
-                        <div class="flex justify-between text-sm"><span>Stack:</span> <span class="font-mono text-purple-500">Docker, Python, Nginx</span></div>
-                        <div class="flex justify-between text-sm"><span>Extra:</span> <span class="font-mono text-purple-500">Interní měření (pokoj)</span></div>
-                    </div>
-                </div>
-
-                <div class="glass-card p-8 relative border-t-4 border-t-pink-500 hover:shadow-2xl transition-all">
-                    <div class="absolute -top-6 left-6 w-12 h-12 bg-pink-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <span class="text-white font-bold text-xl">C</span>
-                    </div>
-                    <h3 class="mt-4 text-xl font-bold mb-2">Webové Rozhraní</h3>
-                    <p class="text-sm text-gray-500 mb-4 uppercase tracking-widest font-semibold">Vizualizace</p>
-                    <p class="text-gray-600 dark:text-gray-400 mb-6 text-sm leading-relaxed">
-                        Moderní Dashboard (SPA) optimalizovaný pro tablety na zdi i mobily.
-                    </p>
-                    <div class="space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <div class="flex justify-between text-sm"><span>Tech:</span> <span class="font-mono text-pink-500">HTML5, Tailwind, JS</span></div>
-                        <div class="flex justify-between text-sm"><span>Grafy:</span> <span class="font-mono text-pink-500">Chart.js</span></div>
-                        <div class="flex justify-between text-sm"><span>Dostupnost:</span> <span class="font-mono text-pink-500">LAN / VPN</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-8 glass-card p-6 flex flex-col md:flex-row items-center justify-between gap-6 opacity-80 hover:opacity-100 transition-opacity">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                        <span class="text-white font-bold text-xl">D</span>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-lg">Modul D: Satelitní Uzel (Rozšíření)</h4>
-                        <p class="text-sm text-gray-500">Bateriový senzor do sklepa/půdy. Ukázka modularity a Deep-Sleep režimu.</p>
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 rounded text-xs font-bold">Solar Power</span>
-                    <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 rounded text-xs font-bold">Low Energy</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="roadmap" class="py-20 px-4">
-        <div class="container mx-auto max-w-5xl">
-            <h2 class="text-3xl font-bold mb-12 text-center">Vývojové Fáze</h2>
             
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="glass-card p-8 border-l-4 border-l-gray-400">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-2xl font-bold">Fáze 1: MVP</h3>
-                        <span class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-xs font-bold">HOTOVO</span>
+            <div class="grid md:grid-cols-2 gap-6 mb-12">
+                <div onclick="openModal('module-a')" class="glass-card interactive-card rounded-2xl p-8 border-l-4 border-l-blue-500 group">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xl">A</div>
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-blue-500 flex items-center gap-1">
+                            Více info <i data-feather="external-link" class="w-3 h-3"></i>
+                        </div>
                     </div>
-                    <p class="text-sm text-gray-500 mb-4">Základní funkční jádro systému.</p>
-                    <ul class="space-y-3">
-                        <li class="flex gap-3 text-sm"><i data-feather="check" class="text-gray-400 w-5 h-5"></i> ESP32 čte BME280</li>
-                        <li class="flex gap-3 text-sm"><i data-feather="check" class="text-gray-400 w-5 h-5"></i> LoRa P2P komunikace</li>
-                        <li class="flex gap-3 text-sm"><i data-feather="check" class="text-gray-400 w-5 h-5"></i> Základní "Carrier Board" PCB</li>
-                        <li class="flex gap-3 text-sm"><i data-feather="check" class="text-gray-400 w-5 h-5"></i> Ukládání do InfluxDB</li>
-                    </ul>
+                    <h3 class="text-2xl font-bold mb-3 dark:text-white text-gray-900">Venkovní měřicí jednotka</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        Autonomní stanice s vlastním PCB. Sběr dat ze senzorů a LoRa vysílání.
+                    </p>
+                    <div class="flex gap-2 flex-wrap">
+                        <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs mono">ESP32</span>
+                        <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs mono">LoRa RFM95</span>
+                        <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs mono">BME280</span>
+                    </div>
                 </div>
-
-                <div class="glass-card p-8 border-l-4 border-l-indigo-500 ring-2 ring-indigo-500/20">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-2xl font-bold text-indigo-500">Fáze 2: Finále</h3>
-                        <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900 rounded-full text-indigo-600 dark:text-indigo-300 text-xs font-bold">V PROCESU</span>
+                
+                <div onclick="openModal('module-b')" class="glass-card interactive-card rounded-2xl p-8 border-l-4 border-l-purple-500 group">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold text-xl">B</div>
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-purple-500 flex items-center gap-1">
+                            Více info <i data-feather="external-link" class="w-3 h-3"></i>
+                        </div>
                     </div>
-                    <p class="text-sm text-gray-500 mb-4">Plná vize a pokročilé funkce.</p>
-                    <ul class="space-y-3">
-                        <li class="flex gap-3 text-sm"><i data-feather="arrow-right" class="text-indigo-500 w-5 h-5"></i> Pokročilé senzory (Blesky, Vítr, UV)</li>
-                        <li class="flex gap-3 text-sm"><i data-feather="arrow-right" class="text-indigo-500 w-5 h-5"></i> 3D tištěné IP65 kryty</li>
-                        <li class="flex gap-3 text-sm"><i data-feather="arrow-right" class="text-indigo-500 w-5 h-5"></i> CI/CD Pipeline & MQTT Broker</li>
-                        <li class="flex gap-3 text-sm"><i data-feather="arrow-right" class="text-indigo-500 w-5 h-5"></i> AI detekce anomálií</li>
-                    </ul>
+                    <h3 class="text-2xl font-bold mb-3 dark:text-white text-gray-900">Headless Server & Brána</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        Centrální mozek systému běžící na RPi. Příjem dat, MQTT broker a databáze.
+                    </p>
+                    <div class="flex gap-2 flex-wrap">
+                        <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded text-xs mono">Raspberry Pi</span>
+                        <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded text-xs mono">Docker</span>
+                        <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded text-xs mono">InfluxDB</span>
+                    </div>
+                </div>
+                
+                <div onclick="openModal('module-c')" class="glass-card interactive-card rounded-2xl p-8 border-l-4 border-l-green-500 group">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 font-bold text-xl">C</div>
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-green-500 flex items-center gap-1">
+                            Více info <i data-feather="external-link" class="w-3 h-3"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 dark:text-white text-gray-900">Webová Vizualizace</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        Interaktivní dashboard hostovaný na Modulu B. Přístupný z PC, mobilu či tabletu.
+                    </p>
+                    <div class="flex gap-2 flex-wrap">
+                        <span class="px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded text-xs mono">React/Vue</span>
+                        <span class="px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded text-xs mono">Grafana</span>
+                        <span class="px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded text-xs mono">SPA</span>
+                    </div>
+                </div>
+                
+                <div onclick="openModal('module-d')" class="glass-card interactive-card rounded-2xl p-8 border-l-4 border-l-orange-500 group">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400 font-bold text-xl">D</div>
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-orange-500 flex items-center gap-1">
+                            Více info <i data-feather="external-link" class="w-3 h-3"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 dark:text-white text-gray-900">Satelitní Uzel</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        Volitelný bateriový senzor (např. do sklepa) pro demonstraci škálovatelnosti.
+                    </p>
+                    <div class="flex gap-2 flex-wrap">
+                        <span class="px-2 py-1 bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded text-xs mono">Low Power</span>
+                        <span class="px-2 py-1 bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded text-xs mono">Baterie</span>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="mt-auto py-12 px-4 border-t border-white/10 bg-white/40 dark:bg-[#0b0d17]/80 backdrop-blur-md">
-        <div class="container mx-auto max-w-7xl flex flex-col md:flex-row justify-between items-center gap-6">
+    <section id="technology" class="relative py-24 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent mb-20"></div>
+            
+            <div class="text-center mb-16">
+                <div class="mono text-sm text-indigo-500 uppercase tracking-wider mb-4">03 / Technologie</div>
+                <h2 class="text-4xl md:text-5xl font-bold mb-6 dark:text-white text-gray-900">Tech Stack</h2>
+                <p class="text-gray-500 dark:text-gray-400">Klikněte pro technické detaily implementace.</p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="glass-card interactive-card rounded-xl p-6 text-center" onclick="openModal('tech-hw')">
+                    <i data-feather="cpu" class="mx-auto w-8 h-8 text-blue-500 mb-3"></i>
+                    <h3 class="font-bold dark:text-white text-gray-900">ESP32 & LoRa</h3>
+                </div>
+                <div class="glass-card interactive-card rounded-xl p-6 text-center" onclick="openModal('tech-backend')">
+                    <i data-feather="server" class="mx-auto w-8 h-8 text-green-500 mb-3"></i>
+                    <h3 class="font-bold dark:text-white text-gray-900">Python & MQTT</h3>
+                </div>
+                <div class="glass-card interactive-card rounded-xl p-6 text-center" onclick="openModal('tech-db')">
+                    <i data-feather="database" class="mx-auto w-8 h-8 text-purple-500 mb-3"></i>
+                    <h3 class="font-bold dark:text-white text-gray-900">InfluxDB</h3>
+                </div>
+                <div class="glass-card interactive-card rounded-xl p-6 text-center" onclick="openModal('tech-frontend')">
+                    <i data-feather="layout" class="mx-auto w-8 h-8 text-orange-500 mb-3"></i>
+                    <h3 class="font-bold dark:text-white text-gray-900">React Dashboard</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="roadmap" class="relative py-24 px-6 bg-gray-50/50 dark:bg-transparent transition-colors">
+        <div class="max-w-4xl mx-auto">
+            <div class="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent mb-20"></div>
+            
+            <div class="text-center mb-16">
+                <div class="mono text-sm text-indigo-500 uppercase tracking-wider mb-4">04 / Plán Projektu</div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-6 dark:text-white text-gray-900">Status Vývoje</h2>
+            </div>
+            
+            <div class="glass-card rounded-2xl p-8 relative">
+                <div class="absolute left-8 top-8 bottom-8 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
+                
+                <div class="relative pl-12 mb-10">
+                    <div class="absolute left-6 top-1.5 w-4 h-4 rounded-full bg-green-500 border-4 border-white dark:border-gray-800 -translate-x-1/2"></div>
+                    <h3 class="text-xl font-bold dark:text-white text-gray-900 mb-2">Fáze 0: Koncept & Web</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Definice cílů, nákup domény, vytvoření prezentační stránky (Tato stránka).
+                        <span class="inline-block px-2 py-0.5 mt-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-xs font-bold">DOKONČENO</span>
+                    </p>
+                </div>
+                
+                <div class="relative pl-12 mb-10">
+                    <div class="absolute left-6 top-1.5 w-4 h-4 rounded-full bg-blue-500 border-4 border-white dark:border-gray-800 -translate-x-1/2 animate-pulse"></div>
+                    <h3 class="text-xl font-bold dark:text-white text-gray-900 mb-2">Fáze 1: MVP (Probíhá)</h3>
+                    <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-2">
+                        <li>• Základní spojení ESP32 + BME280</li>
+                        <li>• LoRa P2P přenos na RPi</li>
+                        <li>• Ukládání do InfluxDB a zobrazení v Grafaně</li>
+                        <li>• Vývoj Carrier Board PCB</li>
+                    </ul>
+                    <span class="inline-block px-2 py-0.5 mt-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-bold">VE VÝVOJI</span>
+                </div>
+                
+                <div class="relative pl-12">
+                    <div class="absolute left-6 top-1.5 w-4 h-4 rounded-full bg-gray-300 dark:bg-gray-600 border-4 border-white dark:border-gray-800 -translate-x-1/2"></div>
+                    <h3 class="text-xl font-bold dark:text-gray-400 text-gray-500 mb-2">Fáze 2: Finální Produkt</h3>
+                    <p class="text-sm text-gray-400 dark:text-gray-500">
+                        Pokročilé senzory (blesky, vítr), 3D tištěné kryty IP65, vlastní React Dashboard, AI detekce anomálií.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="relative py-12 px-6 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0b0d17] transition-colors">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="text-center md:text-left">
-                <h4 class="font-bold text-lg">SkySensor<span class="text-indigo-500">.tech</span></h4>
-                <p class="text-sm text-gray-500 mt-1">Maturitní projekt 2026</p>
+                <span class="text-xl font-bold dark:text-white text-gray-900">SkySensor<span class="text-indigo-500">.tech</span></span>
+                <p class="text-xs text-gray-500 mt-1">© 2026 Maturitní Projekt</p>
             </div>
             
-            <div class="flex gap-6">
-                <a href="mailto:info@skysensor.tech" class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-indigo-500 transition-colors">
-                    <i data-feather="mail" class="w-4 h-4"></i> info@skysensor.tech
-                </a>
-                 <a href="mailto:support@skysensor.tech" class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-indigo-500 transition-colors">
-                    <i data-feather="life-buoy" class="w-4 h-4"></i> support
-                </a>
-            </div>
-
-            <div class="text-sm text-gray-500">
-                &copy; 2026 Všechna práva vyhrazena.
+            <div class="flex gap-6 text-sm text-gray-500">
+                <a href="#" class="hover:text-indigo-500 transition-colors">Dokumentace</a>
+                <a href="#" class="hover:text-indigo-500 transition-colors">GitHub</a>
             </div>
         </div>
     </footer>
+
+    <div id="modal-overlay" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="modal-content w-full max-w-2xl bg-white dark:bg-[#1a1c2c] rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+            
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-[#1a1c2c] z-10">
+                <h3 id="modal-title" class="text-2xl font-bold dark:text-white text-gray-900">Titulek</h3>
+                <button onclick="closeModal()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group">
+                    <i data-feather="x" class="w-6 h-6 text-gray-500 group-hover:text-red-500 transition-colors"></i>
+                </button>
+            </div>
+            
+            <div id="modal-body" class="p-6 overflow-y-auto text-gray-600 dark:text-gray-300 leading-relaxed">
+                </div>
+            
+            <div class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#151725] flex justify-end">
+                <button onclick="closeModal()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">
+                    Zavřít
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Inicializace ikon
         feather.replace();
 
-        // Dark/Light Mode logika (stejná jako dashboard)
+        // --- DARK MODE LOGIC ---
         const themeToggle = document.getElementById('theme-toggle');
-        const themeIcon = themeToggle.querySelector('i');
-        
-        function setTheme(theme) {
+        const themeIcon = document.getElementById('theme-icon');
+
+        function updateIcon(theme) {
             if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                document.documentElement.classList.remove('light');
                 themeIcon.setAttribute('data-feather', 'sun');
             } else {
-                document.documentElement.classList.remove('dark');
-                document.documentElement.classList.add('light');
                 themeIcon.setAttribute('data-feather', 'moon');
             }
             feather.replace();
-            localStorage.setItem('theme', theme);
         }
+
+        // Set initial icon
+        updateIcon(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 
         themeToggle.addEventListener('click', () => {
-            const isDark = document.documentElement.classList.contains('dark');
-            setTheme(isDark ? 'light' : 'dark');
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+                updateIcon('light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+                updateIcon('dark');
+            }
         });
 
-        // Načtení uloženého tématu
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            setTheme(savedTheme);
-        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            setTheme('dark');
+        // --- MODAL LOGIC & DATA ---
+        // Data vytažená z poskytnutého .docx dokumentu
+        const projectData = {
+            'module-a': {
+                title: 'Modul A: Venkovní měřicí jednotka',
+                content: `
+                    <div class="space-y-4">
+                        <p class="font-medium text-indigo-500">Primární sběr dat z prostředí.</p>
+                        <p>Autonomní venkovní jednotka navržená pro dlouhodobý provoz. Je postavena na vlastním navrženém "Carrier Board" PCB.</p>
+                        
+                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Hardware Specifikace:</h4>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>MCU:</strong> ESP32 (WROOM-32) - zvolen pro deep-sleep režimy a výkon.</li>
+                            <li><strong>Komunikace:</strong> LoRa modul RFM95 (868 MHz) v P2P režimu pro dlouhý dosah.</li>
+                            <li><strong>Základní senzory:</strong> BME280 (Tlak, Teplota, Vlhkost).</li>
+                            <li><strong>Pokročilé senzory (Fáze 2):</strong> AS3935 (Detektor blesků), srážkoměr, anemometr.</li>
+                        </ul>
+
+                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Konstrukce:</h4>
+                        <p>3D tištěný kryt z materiálu ASA/PETG splňující standard IP65. Obsahuje radiační štít pro přesné měření teploty.</p>
+                    </div>
+                `
+            },
+            'module-b': {
+                title: 'Modul B: Headless Server',
+                content: `
+                    <div class="space-y-4">
+                        <p class="font-medium text-indigo-500">Centrální mozek a brána systému.</p>
+                        <p>Vnitřní jednotka běžící v "headless" režimu (bez monitoru). Slouží jako most mezi LoRa sítí a domácí LAN/Cloudem.</p>
+                        
+                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Funkcionalita:</h4>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>Hardware:</strong> Raspberry Pi 4B/5 v chlazené krabičce.</li>
+                            <li><strong>Příjem dat:</strong> Python skript naslouchající na LoRa modulu.</li>
+                            <li><strong>MQTT Broker:</strong> Eclipse Mosquitto pro distribuci zpráv.</li>
+                            <li><strong>Databáze:</strong> InfluxDB pro ukládání časových řad a historickou analýzu.</li>
+                        </ul>
+                        
+                        <p class="text-sm bg-gray-100 dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 mt-2">
+                            Obsahuje také vlastní interní senzor BME280 pro měření podmínek v technické místnosti.
+                        </p>
+                    </div>
+                `
+            },
+            'module-c': {
+                title: 'Modul C: Klientské Rozhraní',
+                content: `
+                    <div class="space-y-4">
+                        <p class="font-medium text-indigo-500">Vizualizační vrstva pro uživatele.</p>
+                        <p>Moderní webová aplikace (Single Page Application) optimalizovaná pro zobrazení na nástěnném tabletu i mobilním telefonu.</p>
+                        
+                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Technologie:</h4>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>Frontend:</strong> React / Vue.js.</li>
+                            <li><strong>Hosting:</strong> Nginx běžící na Modulu B (RPi).</li>
+                            <li><strong>Analytika:</strong> Grafana pro detailní grafy a historické trendy.</li>
+                        </ul>
+
+                        <h4 class="font-bold text-lg dark:text-white text-gray-900 mt-4">Budoucí funkce:</h4>
+                        <p>Implementace AI (Machine Learning) pro detekci anomálií a predikci počasí.</p>
+                    </div>
+                `
+            },
+            'module-d': {
+                title: 'Modul D: Satelitní Uzel',
+                content: `
+                    <div class="space-y-4">
+                        <p class="font-medium text-indigo-500">Demonstrace modularity a škálovatelnosti.</p>
+                        <p>Volitelný přídavný senzor pro specifická měření (např. sklep, půda), který ukazuje schopnost systému přijímat data z více zdrojů najednou.</p>
+                        
+                        <ul class="list-disc pl-5 space-y-1 mt-4">
+                            <li>Napájení z baterie (Li-Ion 18650).</li>
+                            <li>Optimalizovaný Deep-Sleep režim.</li>
+                            <li>Odesílá data do stejné brány (Modul B).</li>
+                        </ul>
+                    </div>
+                `
+            },
+            'tech-hw': {
+                title: 'Hardware: ESP32 & LoRa',
+                content: 'Základem je mikrokontrolér ESP32 díky své nízké spotřebě a výkonu. Pro přenos dat na vzdálenost až 10 km (při přímé viditelnosti) je využit protokol LoRa na frekvenci 868 MHz. Nejde o LoRaWAN, ale o optimalizovaný P2P protokol pro nižší latenci.'
+            },
+            'tech-backend': {
+                title: 'Backend: Python & MQTT',
+                content: 'Serverová část je napsána v jazyce Python (verze 3.11+). Zajišťuje čtení dat ze sériového portu (LoRa hat) a jejich publikování přes protokol MQTT. Celý backend běží v Docker kontejnerech pro snadné nasazení a izolaci.'
+            },
+            'tech-db': {
+                title: 'Data: InfluxDB',
+                content: 'Pro ukládání meteorologických dat je relační databáze nevhodná. Proto využíváme InfluxDB - databázi optimalizovanou pro časové řady (Time Series Database). To umožňuje rychlé dotazování na historii a efektivní kompresi dat.'
+            },
+            'tech-frontend': {
+                title: 'Frontend: React & Grafana',
+                content: 'Pro běžného uživatele vzniká přehledný Dashboard v Reactu ("Krásné zobrazení"). Pro hloubkovou analýzu dat (tlakové tendence, porovnání týdnů) slouží instance Grafany napojená přímo na InfluxDB.'
+            }
+        };
+
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        function openModal(id) {
+            const data = projectData[id];
+            if (!data) return;
+
+            modalTitle.innerText = data.title;
+            modalBody.innerHTML = data.content;
+            
+            modalOverlay.classList.remove('hidden'); // fail-safe if hidden class used
+            // Small timeout to allow display:block to apply before opacity transition
+            setTimeout(() => {
+                modalOverlay.classList.add('active');
+            }, 10);
+            document.body.style.overflow = 'hidden'; // Prevent scrolling bg
         }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            setTimeout(() => {
+                // Wait for transition to finish
+                // modalOverlay.classList.add('hidden'); // optional if strictly hiding
+            }, 300);
+            document.body.style.overflow = '';
+        }
+
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Close on clicking outside content
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+
+        // Fade-in animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in-up');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
     </script>
 </body>
 </html>
