@@ -12,7 +12,6 @@
     <script src="https://unpkg.com/feather-icons"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
-        // Konfigurace Tailwind
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -30,7 +29,6 @@
             }
         }
         
-        // --- ROBUSTNÍ LOGIKA PRO DARK MODE (Brave Friendly) ---
         try {
             const storedTheme = localStorage.getItem('theme');
             const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -47,7 +45,6 @@
         }
     </script>
     <style>
-        /* Základní styly */
         body {
             background-color: #0b0d17;
             color: #f3f4f6;
@@ -60,13 +57,11 @@
             color: #1e293b;
         }
 
-        /* Třída pro efekt mizení při změně jazyka */
         body.lang-switching {
             opacity: 0;
             pointer-events: none;
         }
 
-        /* AURORA POZADÍ */
         .dark body::before {
             content: '';
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -10;
@@ -89,7 +84,6 @@
             100% { transform: rotate(360deg) scale(1); } 
         }
         
-        /* Glass Card */
         .glass-card {
             background: rgba(26, 28, 44, 0.6);
             backdrop-filter: blur(20px);
@@ -117,7 +111,6 @@
             background-image: linear-gradient(to right, #6366f1, #a855f7, #ec4899);
         }
         
-        /* Animace */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -128,7 +121,6 @@
         .delay-3 { animation-delay: 0.3s; }
         .delay-4 { animation-delay: 0.4s; }
         
-        /* Modal */
         .modal-overlay {
             opacity: 0; visibility: hidden;
             transition: all 0.3s ease-in-out;
@@ -144,13 +136,11 @@
             transform: scale(1) translateY(0);
         }
         
-        /* Focus styles */
         #theme-toggle:focus-visible, #lang-toggle:focus-visible {
             outline: none;
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5);
         }
         
-        /* Mobile Menu Styles */
         .mobile-menu {
             position: fixed;
             top: 0;
@@ -193,7 +183,6 @@
             visibility: visible;
         }
         
-        /* Hamburger Icon */
         .hamburger {
             width: 24px;
             height: 20px;
@@ -240,7 +229,6 @@
             left: 50%;
         }
         
-        /* Touch-friendly buttons */
         @media (max-width: 640px) {
             button, a, .interactive-card {
                 min-height: 44px;
@@ -254,7 +242,6 @@
             }
         }
         
-        /* Roadmap mobile adjustments */
         @media (max-width: 768px) {
             #roadmap-container {
                 padding: 1.5rem;
@@ -274,7 +261,6 @@
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
         
-        /* Safe area for notches */
         @supports(padding: max(0px)) {
             body, header, .mobile-menu {
                 padding-left: min(0px, env(safe-area-inset-left));
@@ -292,7 +278,6 @@
             <img src="./skysensor_white.png" alt="SkySensor" class="h-8 md:h-10 hidden dark:block">
         </a>
         
-        <!-- Desktop Navigation -->
         <nav class="hidden md:flex items-center gap-8 font-medium text-sm text-gray-500 dark:text-gray-400 absolute left-1/2 -translate-x-1/2">
             <a href="#" class="hover:text-indigo-500 transition-colors" data-i18n="nav_home">Home</a>
             <a href="#architecture" class="hover:text-indigo-500 transition-colors" data-i18n="nav_arch">Architektura</a>
@@ -301,7 +286,6 @@
         </nav>
         
         <div class="flex items-center gap-3">
-            <!-- Mobile Menu Toggle -->
             <button id="mobile-menu-toggle" class="md:hidden p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                 <div class="hamburger">
                     <span></span>
@@ -322,7 +306,6 @@
     </div>
 </header>
 
-<!-- Mobile Menu -->
 <div id="mobile-menu-overlay" class="mobile-menu-overlay"></div>
 <nav id="mobile-menu" class="mobile-menu">
     <div class="flex flex-col gap-6 p-6">
@@ -507,7 +490,6 @@
         </div>
         
         <div id="roadmap-container" class="glass-card rounded-2xl p-4 sm:p-6 md:p-8 relative min-h-[300px] sm:min-h-[400px]">
-            <!-- Roadmap will be rendered here -->
         </div>
     </div>
 </section>
@@ -556,7 +538,6 @@
     </div>
 
     <script>
-        // --- MOBILE MENU LOGIC ---
         const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
@@ -579,19 +560,16 @@
         mobileMenuToggle.addEventListener('click', toggleMobileMenu);
         mobileMenuOverlay.addEventListener('click', closeMobileMenu);
 
-        // Close mobile menu when clicking on links
         document.querySelectorAll('#mobile-menu a').forEach(link => {
             link.addEventListener('click', closeMobileMenu);
         });
 
-        // Close mobile menu on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
                 closeMobileMenu();
             }
         });
 
-        // --- TRANSLATION DATA ---
         const translations = {
             cs: {
                 nav_home: "Home",
@@ -689,145 +667,22 @@
             }
         };
 
-        // --- ROADMAP DATA ---
-        const roadmapData = [
-  {
-    "id": 1,
-    "status": "done",
-    "title": { "cs": "1. Analýza & Definice", "en": "1. Analysis & Definition" },
-    "badge": { "cs": "DOKONČENO", "en": "COMPLETED" },
-    "desc": {
-      "cs": "Stanovení cílů projektu a příprava infrastruktury.",
-      "en": "Defining project goals and preparing infrastructure."
-    },
-    "items": [
-      {
-        "cs": "Analýza zadání a definice modulů (A – venkovní, B – centrála)",
-        "en": "Assignment analysis and module definition (A – outdoor, B – central)"
-      },
-      {
-        "cs": "Návrh architektury systému a toku dat",
-        "en": "System architecture design and data flow definition"
-      },
-      {
-        "cs": "Zprovoznění webové prezentace a domény",
-        "en": "Launching web presentation and domain"
-      }
-    ]
-  },
-  {
-    "id": 2,
-    "status": "current",
-    "title": { "cs": "2. Návrh & Prototypování", "en": "2. Design & Prototyping" },
-    "badge": { "cs": "PRÁVĚ PROBÍHÁ", "en": "IN PROGRESS" },
-    "desc": {
-      "cs": "Technický návrh elektroniky a výběr komponent.",
-      "en": "Technical electronics design and component selection."
-    },
-    "items": [
-      {
-        "cs": "Výběr HW: ESP32, LoRa, Raspberry Pi a senzorů",
-        "en": "HW Selection: ESP32, LoRa, Raspberry Pi and sensors"
-      },
-      {
-        "cs": "Návrh PCB (Carrier Board) a elektroniky modulů",
-        "en": "PCB design (Carrier Board) and module electronics"
-      },
-      {
-        "cs": "3D modely: Kryt venkovní jednotky a case pro RPi (rozšíření)",
-        "en": "3D models: Outdoor enclosure and RPi case (extension)"
-      }
-    ]
-  },
-  {
-    "id": 3,
-    "status": "planned",
-    "title": { "cs": "3. Realizace & Vývoj SW", "en": "3. Realization & SW Dev" },
-    "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
-    "desc": {
-      "cs": "Fyzická výroba a programování backendu.",
-      "en": "Physical manufacturing and backend programming."
-    },
-    "items": [
-      {
-        "cs": "Výroba PCB, osazení a kompletace hardware",
-        "en": "PCB manufacturing, assembly and hardware completion"
-      },
-      {
-        "cs": "Vývoj FW pro ESP32: Čtení senzorů a LoRa komunikace",
-        "en": "ESP32 FW development: Sensor reading and LoRa comms"
-      },
-      {
-        "cs": "Backend: Příjem dat, databáze a REST API",
-        "en": "Backend: Data ingestion, database and REST API"
-      }
-    ]
-  },
-  {
-    "id": 4,
-    "status": "planned",
-    "title": { "cs": "4. UI & Integrace", "en": "4. UI & Integration" },
-    "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
-    "desc": {
-      "cs": "Finální vizualizace a otestování celku.",
-      "en": "Final visualization and system testing."
-    },
-    "items": [
-      {
-        "cs": "Vývoj webového rozhraní pro vizualizaci hodnot",
-        "en": "Web interface development for data visualization"
-      },
-      {
-        "cs": "Implementace AI pro detekci anomálií (rozšíření)",
-        "en": "AI implementation for anomaly detection (extension)"
-      },
-      {
-        "cs": "Celkové testování a technická dokumentace",
-        "en": "System testing and technical documentation"
-      }
-    ]
-  }
-];
+        let roadmapData = [];
 
-
-        // Načtení externího JSON souboru
-        fetch('./roadmap.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Nelze načíst soubor roadmap.json');
-                }
-                return response.json();
-            })
-            .then(data => {
-                roadmapData = data; // Uložení načtených dat do proměnné
-                renderRoadmap(); // Spuštění vykreslení až ve chvíli, kdy máme data
-            })
-            .catch(error => {
-                console.error('Chyba při načítání dat:', error);
-                const container = document.getElementById('roadmap-container');
-                if (container) {
-                    container.innerHTML = `
-                        <div class="text-center p-8 text-gray-500">
-                            <p>Nepodařilo se načíst data plánu.</p>
-                            <p class="text-xs mt-2 opacity-70">(Pokud toto vidíte lokálně, spusťte web přes Live Server)</p>
-                        </div>`;
-                }
-            });
-
-        // --- RENDER ROADMAP ---
         function renderRoadmap() {
             const container = document.getElementById('roadmap-container');
             if (!container) return;
             
-            // Pokud ještě nejsou data načtena (pole je prázdné), nic nevykreslujeme (nebo můžeme dát loading)
-            if (roadmapData.length === 0) return;
+            if (!roadmapData || roadmapData.length === 0) {
+                container.innerHTML = '<div class="text-center p-8 text-gray-500 animate-pulse">Načítám plán projektu...</div>';
+                return;
+            }
 
             let html = `<div class="absolute left-4 sm:left-8 top-10 bottom-10 w-0.5 bg-gray-200 dark:bg-gray-700"></div>`;
 
             roadmapData.forEach(phase => {
-                // Ošetření, aby kód nespadl, pokud chybí překlad pro aktuální jazyk (fallback na 'cs')
-                const title = phase.title[currentLang] || phase.title['cs'];
-                const desc = phase.desc[currentLang] || phase.desc['cs'];
+                const title = (phase.title[currentLang] || phase.title['cs']);
+                const desc = (phase.desc[currentLang] || phase.desc['cs']);
                 const badge = phase.badge ? (phase.badge[currentLang] || phase.badge['cs']) : '';
                 
                 let iconHtml = '';
@@ -840,9 +695,7 @@
                         <div class="absolute left-4 sm:left-8 top-1.5 w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-green-500 border-2 sm:border-4 border-white dark:border-[#1a1c2c] -translate-x-1/2 flex items-center justify-center shadow-lg shadow-green-500/30">
                             <i data-feather="check" class="w-2 h-2 sm:w-3 sm:h-3 text-white"></i>
                         </div>`;
-                    if (badge) {
-                        badgeHtml = `<span class="ml-2 inline-block px-2 py-0.5 text-[9px] sm:text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded uppercase tracking-wide font-bold">${badge}</span>`;
-                    }
+                    if (badge) badgeHtml = `<span class="ml-2 inline-block px-2 py-0.5 text-[9px] sm:text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded uppercase tracking-wide font-bold">${badge}</span>`;
                     borderClass = 'border-green-500/20';
                 } 
                 else if (phase.status === 'current') {
@@ -850,9 +703,7 @@
                         <div class="absolute left-4 sm:left-8 top-1.5 w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-indigo-500 border-2 sm:border-4 border-white dark:border-[#1a1c2c] -translate-x-1/2 shadow-lg shadow-indigo-500/30">
                             <div class="absolute inset-0 rounded-full animate-ping bg-indigo-500 opacity-75"></div>
                         </div>`;
-                    if (badge) {
-                        badgeHtml = `<span class="ml-2 inline-block px-2 py-0.5 text-[9px] sm:text-[10px] bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded uppercase tracking-wide font-bold">${badge}</span>`;
-                    }
+                    if (badge) badgeHtml = `<span class="ml-2 inline-block px-2 py-0.5 text-[9px] sm:text-[10px] bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded uppercase tracking-wide font-bold">${badge}</span>`;
                     borderClass = 'border-indigo-500/20';
                 } 
                 else {
@@ -860,9 +711,7 @@
                         <div class="absolute left-4 sm:left-8 top-1.5 w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gray-200 dark:bg-gray-700 border-2 sm:border-4 border-white dark:border-[#1a1c2c] -translate-x-1/2"></div>`;
                     opacityClass = 'opacity-80';
                     borderClass = 'border-gray-300 dark:border-gray-700';
-                    if (badge) { // Pokud je badge i u plánovaných (např. PLÁNOVÁNO)
-                         badgeHtml = `<span class="ml-2 inline-block px-2 py-0.5 text-[9px] sm:text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded uppercase tracking-wide font-bold">${badge}</span>`;
-                    }
+                    if (badge) badgeHtml = `<span class="ml-2 inline-block px-2 py-0.5 text-[9px] sm:text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded uppercase tracking-wide font-bold">${badge}</span>`;
                 }
 
                 const listItems = phase.items.map(item => 
@@ -886,14 +735,123 @@
             });
 
             container.innerHTML = html;
-            
-            // Obnovení ikonek (Feather icons), protože jsme právě přepsali HTML
-            if (typeof feather !== 'undefined') {
-                feather.replace();
-            }
+            if (typeof feather !== 'undefined') feather.replace();
         }
 
-        // --- ICONS & THEME ---
+        function loadRoadmapData() {
+            fetch('./roadmap.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('Chyba sítě');
+                    return response.json();
+                })
+                .then(data => {
+                    roadmapData = data;
+                    renderRoadmap();
+                })
+                .catch(error => {
+                    console.error('Chyba roadmapy:', error);
+                    roadmapData = [
+                        {
+                            "id": 1,
+                            "status": "done",
+                            "title": { "cs": "1. Analýza & Definice", "en": "1. Analysis & Definition" },
+                            "badge": { "cs": "DOKONČENO", "en": "COMPLETED" },
+                            "desc": {
+                                "cs": "Stanovení cílů projektu a příprava infrastruktury.",
+                                "en": "Defining project goals and preparing infrastructure."
+                            },
+                            "items": [
+                                {
+                                    "cs": "Analýza zadání a definice modulů (A – venkovní, B – centrála)",
+                                    "en": "Assignment analysis and module definition (A – outdoor, B – central)"
+                                },
+                                {
+                                    "cs": "Návrh architektury systému a toku dat",
+                                    "en": "System architecture design and data flow definition"
+                                },
+                                {
+                                    "cs": "Zprovoznění webové prezentace a domény",
+                                    "en": "Launching web presentation and domain"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 2,
+                            "status": "current",
+                            "title": { "cs": "2. Návrh & Prototypování", "en": "2. Design & Prototyping" },
+                            "badge": { "cs": "PRÁVĚ PROBÍHÁ", "en": "IN PROGRESS" },
+                            "desc": {
+                                "cs": "Technický návrh elektroniky a výběr komponent.",
+                                "en": "Technical electronics design and component selection."
+                            },
+                            "items": [
+                                {
+                                    "cs": "Výběr HW: ESP32, LoRa, Raspberry Pi a senzorů",
+                                    "en": "HW Selection: ESP32, LoRa, Raspberry Pi and sensors"
+                                },
+                                {
+                                    "cs": "Návrh PCB (Carrier Board) a elektroniky modulů",
+                                    "en": "PCB design (Carrier Board) and module electronics"
+                                },
+                                {
+                                    "cs": "3D modely: Kryt venkovní jednotky a case pro RPi (rozšíření)",
+                                    "en": "3D models: Outdoor enclosure and RPi case (extension)"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 3,
+                            "status": "planned",
+                            "title": { "cs": "3. Realizace & Vývoj SW", "en": "3. Realization & SW Dev" },
+                            "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
+                            "desc": {
+                                "cs": "Fyzická výroba a programování backendu.",
+                                "en": "Physical manufacturing and backend programming."
+                            },
+                            "items": [
+                                {
+                                    "cs": "Výroba PCB, osazení a kompletace hardware",
+                                    "en": "PCB manufacturing, assembly and hardware completion"
+                                },
+                                {
+                                    "cs": "Vývoj FW pro ESP32: Čtení senzorů a LoRa komunikace",
+                                    "en": "ESP32 FW development: Sensor reading and LoRa comms"
+                                },
+                                {
+                                    "cs": "Backend: Příjem dat, databáze a REST API",
+                                    "en": "Backend: Data ingestion, database and REST API"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 4,
+                            "status": "planned",
+                            "title": { "cs": "4. UI & Integrace", "en": "4. UI & Integration" },
+                            "badge": { "cs": "PLÁNOVÁNO", "en": "PLANNED" },
+                            "desc": {
+                                "cs": "Finální vizualizace a otestování celku.",
+                                "en": "Final visualization and system testing."
+                            },
+                            "items": [
+                                {
+                                    "cs": "Vývoj webového rozhraní pro vizualizaci hodnot",
+                                    "en": "Web interface development for data visualization"
+                                },
+                                {
+                                    "cs": "Implementace AI pro detekci anomálií (rozšíření)",
+                                    "en": "AI implementation for anomaly detection (extension)"
+                                },
+                                {
+                                    "cs": "Celkové testování a technická dokumentace",
+                                    "en": "System testing and technical documentation"
+                                }
+                            ]
+                        }
+                    ];
+                    renderRoadmap();
+                });
+        }
+
         const themeToggle = document.getElementById('theme-toggle');
         const langToggle = document.getElementById('lang-toggle');
         let currentLang = 'cs';
@@ -932,7 +890,6 @@
             }
         });
 
-        // --- LANGUAGE LOGIC ---
         function updateTexts(lang) {
             document.querySelectorAll('[data-i18n]').forEach(element => {
                 const key = element.getAttribute('data-i18n');
@@ -954,17 +911,14 @@
                 } catch(e) {}
                 
                 updateTexts(lang);
-                
-                if (typeof renderRoadmap === 'function') {
-                    renderRoadmap();
-                }
+                renderRoadmap();
                 
                 document.body.classList.remove('lang-switching');
             }, 300);
         }
 
         function initLanguage() {
-            let targetLang = 'en';
+            let targetLang = 'cs';
 
             try {
                 if (localStorage.getItem('language')) {
@@ -991,7 +945,6 @@
             currentLang = targetLang;
             langToggle.innerText = targetLang === 'cs' ? 'CZ' : 'EN';
             updateTexts(targetLang);
-            renderRoadmap();
         }
 
         langToggle.addEventListener('click', () => {
@@ -999,11 +952,10 @@
             setLanguage(newLang);
         });
 
-        // Run init
         initLanguage();
         feather.replace();
+        loadRoadmapData();
 
-        // --- UTILS ---
         function copyEmail() {
             const email = "info@skysensor.tech";
             navigator.clipboard.writeText(email).then(() => {
@@ -1013,7 +965,6 @@
             });
         }
 
-        // --- MODAL LOGIC ---
         const projectData = {
             'module-a': {
                 title_cs: 'Modul A: Venkovní měřicí jednotka',
@@ -1204,7 +1155,6 @@
             if (e.target === modalOverlay) closeModal();
         });
 
-        // Fade-in animations
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -1215,7 +1165,6 @@
 
         document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
         
-        // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -1250,29 +1199,25 @@
                 }
             });
         });
-        // --- OCHRANA PROTI KOPÍROVÁNÍ ---
-document.addEventListener('contextmenu', event => {
-    event.preventDefault(); // Zablokuje pravé tlačítko myši
-});
+        
+        document.addEventListener('contextmenu', event => {
+            event.preventDefault();
+        });
 
-document.addEventListener('keydown', function(event) {
-    // Zablokování F12 (Developer Tools)
-    if(event.key === 'F12') {
-        event.preventDefault();
-    }
-    // Zablokování Ctrl+U (Zdrojový kód)
-    if(event.ctrlKey && (event.key === 'u' || event.key === 'U')) {
-        event.preventDefault();
-    }
-    // Zablokování Ctrl+S (Uložit stránku)
-    if(event.ctrlKey && (event.key === 's' || event.key === 'S')) {
-        event.preventDefault();
-    }
-    // Zablokování Ctrl+Shift+I (Developer Tools)
-    if(event.ctrlKey && event.shiftKey && (event.key === 'i' || event.key === 'I')) {
-        event.preventDefault();
-    }
-});
+        document.addEventListener('keydown', function(event) {
+            if(event.key === 'F12') {
+                event.preventDefault();
+            }
+            if(event.ctrlKey && (event.key === 'u' || event.key === 'U')) {
+                event.preventDefault();
+            }
+            if(event.ctrlKey && (event.key === 's' || event.key === 'S')) {
+                event.preventDefault();
+            }
+            if(event.ctrlKey && event.shiftKey && (event.key === 'i' || event.key === 'I')) {
+                event.preventDefault();
+            }
+        });
     </script>
 </body>
 </html>
